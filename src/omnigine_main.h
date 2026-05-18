@@ -47,8 +47,8 @@ static void PostRender(float dt);
 // Called once after the window is initialized
 static void Init();
 
-// Called continuously while the window shouldn't close
-static void Render(float dt);
+// Called continuously while the window shouldn't close, return false when exiting game loop in-game
+static bool Render(float dt);
 #endif
 
 // Called once right before the window closes
@@ -80,12 +80,6 @@ int main() {
         if (!nextScene) {
             emscripten_cancel_main_loop();
 
-            // Cleanup
-            if (currentScene) {
-                delete currentScene;
-                currentScene = nullptr;
-            }
-
             // De-Initialization
             Dispose();
             CloseWindow();
@@ -112,7 +106,13 @@ int main() {
     }, 0, 1);
 #else
     emscripten_set_main_loop([]() {
-        Render(GetFrameTime());
+        if (!Render(GetFrameTime())) {
+            emscripten_cancel_main_loop();
+
+            // De-Initialization
+            Dispose();
+            CloseWindow();
+        }
     }, 0, 1);
 #endif
 #else // PLATFORM_WEB
@@ -146,8 +146,9 @@ int main() {
         nextScene = nullptr;
     }
 #else
-    while (!WindowShouldClose())
-        Render(GetFrameTime());
+    while (!WindowShouldClose()) {
+        if (!Render(GetFrameTime())) break;
+    }
 #endif // OMNI_SCENE
 #endif // PLATFORM_WEB
 
