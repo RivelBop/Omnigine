@@ -10,8 +10,6 @@ static void Tick() {
 }
 
 bool Render(float dt) {
-    using namespace Omni;
-
     static float clock = 0.0f;
     OMNI_TICK(clock, dt, 0.05f, Tick)
 

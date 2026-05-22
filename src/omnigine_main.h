@@ -2,6 +2,7 @@
 
 /* ==================== IMPORTS ==================== */
 
+#include "raylib.h"
 #include "omnigine.h"
 
 #ifdef OMNI_SCENE
@@ -58,10 +59,8 @@ static void Dispose();
 
 // Not inline since there can only be one translation unit with this header
 int main() {
-    using namespace Omni;
-
     // Initialization
-    InitWindow(WIDTH, HEIGHT, "Omnigine - Base Title");
+    InitWindow(Omni::WIDTH, Omni::HEIGHT, "Omnigine - Base Title");
 #ifdef OMNI_SCENE
     // Static for stateless lambda for web
     static Scene *currentScene = Init();
