@@ -26,6 +26,7 @@ add_executable(${PROJECT_NAME} src/main.cpp
         src/omnigine_main.h
         src/omnigine.h
         src/omnigine_scene.h
+        src/omnigine_tick.h
 )
 #set(raylib_VERBOSE 1)
 target_link_libraries(${PROJECT_NAME} raylib)

@@ -1,13 +1,20 @@
 #include "omnigine_main.h"
+#include "omnigine_tick.h"
 #include <iostream>
 
 void Init() {
 }
 
+static void Tick() {
+    std::cout << "TICK\n";
+}
+
 bool Render(float dt) {
     using namespace Omni;
 
-    std::cout << "Delta Time: " << dt << '\n';
+    static float clock = 0.0f;
+    OMNI_TICK(clock, dt, 0.05f, Tick)
+
     BeginDrawing();
     EndDrawing();
 
