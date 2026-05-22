@@ -3,7 +3,7 @@
 /* ==================== IMPORTS ==================== */
 
 #include "raylib.h"
-#include "omnigine.h"
+#include "omni.h"
 
 #ifdef OMNI_SCENE
 #include "omnigine_scene.h"

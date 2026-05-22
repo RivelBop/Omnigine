@@ -1,5 +1,5 @@
-#include "omnigine_main.h"
-#include "omnigine_tick.h"
+#include "omni_main.h"
+#include "omni_tick.h"
 #include <iostream>
 
 void Init() {
