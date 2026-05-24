@@ -11,7 +11,9 @@ static void Tick() {
 
 bool Render(float dt) {
     static float clock = 0.0f;
-    OMNI_TICK(clock, dt, 0.05f, Tick)
+    static float alpha = 0.0f;
+
+    OMNI_TICK(clock, dt, 0.05f, Tick, alpha)
 
     BeginDrawing();
     EndDrawing();
