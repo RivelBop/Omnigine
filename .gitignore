@@ -45,11 +45,16 @@ build-*/
 
 # CMake generated files
 CMakeFiles/
+CMakeScripts
+CMakeLists.txt.user
 CMakeCache.txt
 cmake_install.cmake
 Makefile
 install_manifest.txt
 compile_commands.json
+CTestTestfile.cmake
+_deps
+CMakeUserPresets.json
 
 # Temporary files
 *.tmp
