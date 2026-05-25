@@ -127,9 +127,7 @@ int main() {
 
         // Called here to ensure the current scene and next scene always match to free memory from both properly
         // This also allows init() to be called before dispose() outside the game loop
-        if (WindowShouldClose()) {
-            break;
-        }
+        if (WindowShouldClose()) break;
 
         // Update the global render functions and the current scene, mark the next scene for any potential changes
         const float dt = GetFrameTime();
@@ -145,9 +143,8 @@ int main() {
         nextScene = nullptr;
     }
 #else
-    while (!WindowShouldClose()) {
-        if (!Render(GetFrameTime())) break;
-    }
+    // Standard Game Loop
+    while (!WindowShouldClose() && Render(GetFrameTime()));
 #endif // OMNI_SCENE
 #endif // PLATFORM_WEB
 
