@@ -40,11 +40,11 @@ endif()
 
 # Our Project
 add_executable(${PROJECT_NAME} src/main.cpp
-        src/omni_main.h
-        src/omni.h
-        src/omni_scene.h
-        src/omni_tick.h
-        src/omni_assets.h
+        src/omnigine/omni_main.h
+        src/omnigine/omni.h
+        src/omnigine/omni_scene.h
+        src/omnigine/omni_tick.h
+        src/omnigine/omni_assets.h
 )
 
 # Explicitly tell your project where to find rres.h (rres is header-only, it doesn't have a CMakeLists.txt to build)
