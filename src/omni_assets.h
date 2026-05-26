@@ -84,7 +84,7 @@ namespace Omni {
             return false;
         }
 
-        // Initalize ALL queued assets for loading
+        // Initialize ALL queued assets for loading
         void finishLoading() {
             while (!update());
         }
