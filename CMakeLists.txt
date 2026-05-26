@@ -44,6 +44,7 @@ add_executable(${PROJECT_NAME} src/main.cpp
         src/omni.h
         src/omni_scene.h
         src/omni_tick.h
+        src/omni_assets.h
 )
 
 # Explicitly tell your project where to find rres.h (rres is header-only, it doesn't have a CMakeLists.txt to build)
