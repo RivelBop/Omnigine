@@ -1,23 +1,42 @@
 # Omnigine
 
-This provides a base project template with Omnigine, which builds with [CMake](https://cmake.org).
+A nice and simple game framework built with [raylib](https://www.raylib.com/) and C++.
 
-## Usage
+Omnigine is inspired by [libGDX](https://libgdx.com/), it serves as a tool to have fun making games quickly in a code-only environment!
 
-To compile the example, use one of the following dependending on your build target...
+This repo is a base project template, which builds with [CMake](https://cmake.org).
 
-### Desktop
+## Features
 
-Use the following to build for desktop:
+* **raylib**: Provides awesome and easy to use graphical, audio, input, and math utilities.
+* **Quick Startup**: Simply clone the repo and build with CMake, all necessary external libraries will be downloaded and configured for you!
+* **Callback System**: Instead of coding your window initialization and game-loop from scratch, use the callback functions from [omni_main.h](src/omnigine/omni_main.h).
+* **Scene System**: Split your games and/or applications into [scenes](src/omnigine/omni_scene.h).
+* **Tick System**: Create a tick system callback anywhere in seconds via the [OMNI_TICK](src/omnigine/omni_tick.h) macro.
+* **Asset Manager**: One place to quickly load, store, retrieve, and unload all your game's assets.
+
+## Getting Started
+
+The Omnigine repo is a project template that is ready to use.
+
+1. Create a repository with Omnigine as the template.
+2. Open the repository in your IDE (Visual Studio Code, CLion, etc.).
+3. Build the project with CMake by following the guide below.
+
+### CMake Usage
+
+To compile your project use one of the following depending on your build target:
+
+#### Desktop (Windows, Linux, MacOS)
 
 ``` bash
 cmake -B build
 cmake --build build
 ```
 
-### Web
+#### Web
 
-Compiling for the web requires the [Emscripten SDK](https://emscripten.org/docs/getting_started/downloads.html):
+Compiling for the web requires the [Emscripten SDK](https://emscripten.org/docs/getting_started/downloads.html).
 
 ``` bash
 mkdir build
@@ -25,3 +44,29 @@ cd build
 emcmake cmake .. -DPLATFORM=Web -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXECUTABLE_SUFFIX=".html"
 emmake make
 ```
+
+## Basic Example
+
+This is a basic Omnigine example, it creates a 1280x720 window with a black background and draws the text
+`"Hello World!"` in the top-left corner of the screen.
+```cpp
+#include "omnigine/omni_main.h"
+
+void Init() {
+}
+
+bool Render(float dt) {
+    BeginDrawing();
+        ClearBackground(BLACK);
+        DrawText("Hello World!", 0, 0, 52, WHITE);
+    EndDrawing();
+    return true;
+}
+
+void Dispose() {
+}
+```
+
+## Examples (Work in Progress)
+
+## Documentation (Work in Progress)
