@@ -25,6 +25,10 @@ The Omnigine repo is a project template that is ready to use.
 
 ### CMake Usage
 
+In [CMakeLists.txt](CMakeLists.txt), you should set a custom name for your project by changing the `project(omnigine)` on line 2 to `project(YOUR_PROJECT_NAME)`.
+
+Any new source files that you create for your project should be added to the `add_executable` block.
+
 To compile your project use one of the following depending on your build target:
 
 #### Desktop (Windows, Linux, MacOS)
