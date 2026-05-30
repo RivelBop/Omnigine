@@ -1,5 +1,8 @@
 #pragma once
 
+#include <SDL3/SDL_render.h>
+#include <SDL3/SDL_video.h>
+
 namespace Omni {
     /* ==================== WINDOW ==================== */
 
@@ -7,6 +10,11 @@ namespace Omni {
     extern const int WIDTH;
     // The default, ideal window height
     extern const int HEIGHT;
+
+    // Access to the window pointer
+    SDL_Window *Window();
+    // Access to the renderer pointer
+    SDL_Renderer *Renderer();
 
     /* ==================== GAME LOOP ==================== */
 
