@@ -13,7 +13,7 @@ namespace Omni {
 
         // Called continuously when this is the current scene.
         // Return this if current scene should stay, nullptr on exit, other Scene* for a new scene to set as current.
-        virtual Scene* render(float dt) = 0;
+        virtual Scene *render(float dt) = 0;
 
         // Called when no longer the current scene to free memory from init(), return true if this should be freed.
         virtual bool dispose() = 0;
