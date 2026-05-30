@@ -9,10 +9,6 @@
 #include "omnigine_scene.h"
 #endif
 
-#ifdef PLATFORM_WEB
-#include <emscripten/emscripten.h>
-#endif
-
 /* ==================== WINDOW PROPERTIES ==================== */
 
 // Window Aspect Ratio
@@ -72,49 +68,6 @@ int main() {
 #endif
 
     // Game Loop
-#ifdef PLATFORM_WEB
-#ifdef OMNI_SCENE
-    emscripten_set_main_loop([]() {
-        // If there is no next scene, the game loop is considered terminated
-        if (!nextScene) {
-            emscripten_cancel_main_loop();
-
-            // De-Initialization
-            Dispose();
-            CloseWindow();
-            return;
-        }
-
-        // Changing Scenes: The current scene is already disposed, initialize the next scene and set it as current
-        if (currentScene != nextScene) {
-            nextScene->init();
-            currentScene = nextScene;
-        }
-
-        // Update the global render functions and the current scene, mark the next scene for any potential changes
-        const float dt = GetFrameTime();
-        PreRender(dt);
-        nextScene = currentScene->render(dt);
-        PostRender(dt);
-
-        // On scene change, if marked to be freed via dispose(), free the current scene from memory
-        if (currentScene != nextScene && currentScene->dispose()) {
-            delete currentScene;
-            currentScene = nullptr;
-        }
-    }, 0, 1);
-#else
-    emscripten_set_main_loop([]() {
-        if (!Render(GetFrameTime())) {
-            emscripten_cancel_main_loop();
-
-            // De-Initialization
-            Dispose();
-            CloseWindow();
-        }
-    }, 0, 1);
-#endif
-#else // PLATFORM_WEB
 #ifdef OMNI_SCENE
     while (nextScene) {
         // Changing Scenes: Dispose and free current scene, initialize the next scene and set it as current
@@ -145,8 +98,7 @@ int main() {
 #else
     // Standard Game Loop
     while (!WindowShouldClose() && Render(GetFrameTime()));
-#endif // OMNI_SCENE
-#endif // PLATFORM_WEB
+#endif
 
     // De-Initialization
     Dispose();
