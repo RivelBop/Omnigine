@@ -6,11 +6,12 @@
 namespace Omni {
     /* ==================== WINDOW AND RENDERING ==================== */
 
-    inline constexpr SDL_RendererLogicalPresentation SCREEN_VIEWPORT        = SDL_LOGICAL_PRESENTATION_DISABLED;
-    inline constexpr SDL_RendererLogicalPresentation STRETCH_VIEWPORT       = SDL_LOGICAL_PRESENTATION_STRETCH;
-    inline constexpr SDL_RendererLogicalPresentation FIT_VIEWPORT           = SDL_LOGICAL_PRESENTATION_LETTERBOX;
-    inline constexpr SDL_RendererLogicalPresentation FILL_VIEWPORT          = SDL_LOGICAL_PRESENTATION_OVERSCAN;
-    inline constexpr SDL_RendererLogicalPresentation PIXEL_PERFECT_VIEWPORT = SDL_LOGICAL_PRESENTATION_INTEGER_SCALE;
+    using Viewport = SDL_RendererLogicalPresentation;
+    inline constexpr Viewport SCREEN_VIEWPORT        = SDL_LOGICAL_PRESENTATION_DISABLED;
+    inline constexpr Viewport STRETCH_VIEWPORT       = SDL_LOGICAL_PRESENTATION_STRETCH;
+    inline constexpr Viewport FIT_VIEWPORT           = SDL_LOGICAL_PRESENTATION_LETTERBOX;
+    inline constexpr Viewport FILL_VIEWPORT          = SDL_LOGICAL_PRESENTATION_OVERSCAN;
+    inline constexpr Viewport PIXEL_PERFECT_VIEWPORT = SDL_LOGICAL_PRESENTATION_INTEGER_SCALE;
 
     /** Access to the window pointer. */
     [[nodiscard]] SDL_Window *Window();
@@ -18,13 +19,12 @@ namespace Omni {
     [[nodiscard]] SDL_Renderer *Renderer();
 
     /** Calls SDL_SetRenderLogicalPresentation() for the global Renderer(). */
-    inline bool SetViewport(const int width, const int height, const SDL_RendererLogicalPresentation viewport) {
+    inline bool SetViewport(const int width, const int height, const Viewport viewport) {
         return SDL_SetRenderLogicalPresentation(Renderer(), width, height, viewport);
     }
 
     /** Calls SDL_SetRenderLogicalPresentation() for the specified SDL_Renderer. */
-    inline bool SetViewport(SDL_Renderer *renderer, const int width, const int height,
-        const SDL_RendererLogicalPresentation viewport) {
+    inline bool SetViewport(SDL_Renderer *renderer, const int width, const int height, const Viewport viewport) {
         return SDL_SetRenderLogicalPresentation(renderer, width, height, viewport);
     }
 
