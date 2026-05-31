@@ -1,5 +1,8 @@
 cmake_minimum_required(VERSION 3.16) # FetchContent on 3.11+, SDL3 on 3.16+
 
+# Specify C++17
+set(CMAKE_CXX_STANDARD 17)
+
 # Initialize with C and C++ globally
 project(omnigine LANGUAGES C CXX)
 
