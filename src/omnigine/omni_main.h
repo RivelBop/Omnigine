@@ -2,105 +2,239 @@
 
 /* ==================== IMPORTS ==================== */
 
-#include "raylib.h"
+/** Use callbacks instead of main(). */
+#define SDL_MAIN_USE_CALLBACKS 1
+#include <SDL3/SDL.h>
+#include <SDL3/SDL_main.h>
+
 #include "omni.h"
 
 #ifdef OMNI_SCENE
-#include "omnigine_scene.h"
+#include "omni_scene.h"
 #endif
 
 /* ==================== WINDOW PROPERTIES ==================== */
 
-// Window Aspect Ratio
-#ifndef OMNI_ASPECT_RATIO
-#define OMNI_ASPECT_RATIO 16/9
-#endif
+namespace {
+    /** Window configuration settings. */
+    struct WindowProperties {
+        /* ========== METADATA ========== */
 
-// Window Height
-#ifndef OMNI_HEIGHT
-#define OMNI_HEIGHT 720
-#endif
+        /** App name in metadata, can be null. */
+        const char *appName = nullptr;
+        /** App version in metadata, can be null. */
+        const char *appVersion = nullptr;
+        /** App ID in metadata, can be null. */
+        const char *appIdentifier = nullptr;
 
-// Window Width
-#ifndef OMNI_WIDTH
-#define OMNI_WIDTH (OMNI_HEIGHT * OMNI_ASPECT_RATIO)
-#endif
+        /* ========== INIT FLAGS ========== */
 
-const int Omni::WIDTH  = OMNI_WIDTH;
-const int Omni::HEIGHT = OMNI_HEIGHT;
+        /** The flags to pass into SDL_Init(), (VIDEO | GAMEPAD) are enabled automatically. */
+        SDL_InitFlags initFlags = 0;
+
+        /* ========== WINDOW ========== */
+
+        /** The window title, can be null. */
+        const char *title = nullptr;
+        /** The window width. */
+        int width = 640;
+        /** The window height. */
+        int height = 480;
+        /** The window flags to pass into SDL_CreateWindowAndRenderer(), no flags by default. */
+        SDL_WindowFlags windowFlags = 0;
+
+        /* ========== VIEWPORT ========== */
+
+        /** The width of the logical resolution. */
+        int viewportWidth = width;
+        /** The height of the logical resolution. */
+        int viewportHeight = height;
+        /** The viewport for the global renderer. */
+        Omni::Viewport viewport = Omni::SCREEN_VIEWPORT;
+
+        /* ========== COPYING & MOVING ========== */
+
+        WindowProperties(const WindowProperties &) = delete;
+        WindowProperties &operator=(const WindowProperties &) = delete;
+        WindowProperties(WindowProperties &&) = delete;
+        WindowProperties &operator=(WindowProperties &&) = delete;
+
+        /* ========== OPERATORS ========== */
+
+        /** Add to the init flags. */
+        WindowProperties &operator|=(const SDL_InitFlags addInitFlags) {
+            initFlags |= addInitFlags;
+            return *this;
+        }
+
+        /** Add to the window flags. */
+        WindowProperties &operator|=(const SDL_WindowFlags addWindowFlags) {
+            windowFlags |= addWindowFlags;
+            return *this;
+        }
+    };
+}
 
 /* ==================== USER FUNCTIONS ==================== */
 
-#ifdef OMNI_SCENE
-// Called once after the window is initialized, return the initial Scene
-static Omni::Scene* Init();
+/** Provide the necessary properties to initialize an SDL3 window. */
+static WindowProperties InitWindow(int argc, char *argv[]);
 
-// Called continuously before the current scene renders
+#ifdef OMNI_SCENE
+/** Called once after the window is initialized, return the initial Scene, null to exit before running game loop. */
+static Omni::Scene *Init(int argc, char *argv[]);
+
+/** Called continuously before the current scene renders. */
 static void PreRender(float dt);
 
-// Called continuously after the current scene renders
+/** Called continuously after the current scene renders. */
 static void PostRender(float dt);
 #else
-// Called once after the window is initialized
-static void Init();
+/** Called once after the window is initialized, return false to exit before running game loop. */
+static bool Init(int argc, char *argv[]);
 
-// Called continuously while the window shouldn't close, return false when exiting game loop in-game
+/** Called continuously while the window shouldn't close, return false to exit game loop. */
 static bool Render(float dt);
 #endif
 
-// Called once right before the window closes
+/** Called once in SDL3's AppQuit callback function. */
 static void Dispose();
 
-/* ==================== WINDOW SETUP ==================== */
+/* ==================== APP STATE ==================== */
 
-// Not inline since there can only be one translation unit with this header
-int main() {
-    // Initialization
-    InitWindow(Omni::WIDTH, Omni::HEIGHT, "Omnigine - Base Title");
+namespace {
+    /** Prevents the user from altering and potentially breaking the app's state; static in SDL_AppInit. */
+    struct AppState {
+        SDL_Window *window = nullptr;
+        SDL_Renderer *renderer = nullptr;
+        bool quit = false;
 #ifdef OMNI_SCENE
-    // Static for stateless lambda for web
-    static Scene *currentScene = Init();
-    if (currentScene)
-        currentScene->init();
-    static Scene *nextScene = currentScene;
-#else
-    Init();
+        Omni::Scene *currentScene = nullptr;
+        Omni::Scene *nextScene = nullptr;
 #endif
+    };
+}
 
-    // Game Loop
-#ifdef OMNI_SCENE
-    while (nextScene) {
-        // Changing Scenes: Dispose and free current scene, initialize the next scene and set it as current
-        if (currentScene != nextScene) {
-            if (currentScene->dispose())
-                delete currentScene;
-            nextScene->init();
-            currentScene = nextScene;
-        }
+/* ==================== SDL3 CALLBACK SETUP ==================== */
 
-        // Called here to ensure the current scene and next scene always match to free memory from both properly
-        // This also allows init() to be called before dispose() outside the game loop
-        if (WindowShouldClose()) break;
+/* Runs once at startup. */
+inline SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[]) {
+    // Get the user's window configuration
+    const WindowProperties properties = InitWindow(argc, argv);
 
-        // Update the global render functions and the current scene, mark the next scene for any potential changes
-        const float dt = GetFrameTime();
-        PreRender(dt);
-        nextScene = currentScene->render(dt);
-        PostRender(dt);
+    // Set the app metadata using the user's properties
+    SDL_SetAppMetadata(properties.appName, properties.appVersion, properties.appIdentifier);
+
+    // Set the initialization flags, VIDEO and GAMEPAD are always enabled
+    if (!SDL_Init(properties.initFlags | SDL_INIT_VIDEO | SDL_INIT_GAMEPAD)) {
+        SDL_Log("Couldn't initialize SDL: %s", SDL_GetError());
+        return SDL_APP_FAILURE;
     }
 
-    // After game loop, dispose remaining scene (if available)
+    // Create the app state to hide from user
+    static AppState appState;
+    *appstate = &appState;
+
+    // Create a window with the provided title, size, and flags; also create a renderer
+    if (!SDL_CreateWindowAndRenderer(properties.title, properties.width, properties.height, properties.windowFlags,
+        &appState.window, &appState.renderer)) {
+        SDL_Log("Couldn't create window/renderer: %s", SDL_GetError());
+        return SDL_APP_FAILURE;
+    }
+
+    // Configure the viewport
+    SDL_SetRenderLogicalPresentation(appState.renderer, properties.viewportWidth, properties.viewportHeight,
+        properties.viewport);
+
+    // After SDL3 and the window are prepared, call the user's Init() function
+#ifdef OMNI_SCENE
+    Omni::Scene* &currentScene = appState.currentScene;
+    Omni::Scene* &nextScene = appState.nextScene;
+
+    currentScene = Init(argc, argv);
+    if (currentScene)
+        currentScene->init();
+    nextScene = currentScene;
+    return currentScene ? SDL_APP_CONTINUE : SDL_APP_FAILURE;
+#else
+    return Init(argc, argv) ? SDL_APP_CONTINUE : SDL_APP_FAILURE;
+#endif
+}
+
+/* This function runs when a new event (mouse input, keypresses, etc.) occurs. */
+inline SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event) {
+    if (event->type == SDL_EVENT_QUIT) {
+        ((AppState*) appstate)->quit = true;
+        return SDL_APP_CONTINUE;
+    }
+
+    // TODO: Listen for and store inputs
+
+    return SDL_APP_CONTINUE;
+}
+
+/* This function runs once per frame, and is the heart of the program. */
+inline SDL_AppResult SDL_AppIterate(void *appstate) {
+    static Uint64 startDt = SDL_GetTicksNS();
+    static Uint64 startFps = startDt;
+    const Uint64 end = SDL_GetTicksNS();
+
+    // Calculate delta time
+    float dt = (end - startDt) / 1e9f;
+    startDt = end;
+
+    // Calculate FPS every 100 ms
+    Uint64 fpsElapsed = end - startFps;
+    if (fpsElapsed > 100000000) {
+        // TODO: Provide the FPS data to the player
+        Uint64 fps = 100000000 / fpsElapsed;
+        startFps = end;
+    }
+
+    AppState &appState = *(AppState*) appstate;
+
+    // Clear the window to the draw color (automatic for the user)
+    SDL_RenderClear(appState.renderer);
+
+#ifdef OMNI_SCENE
+    Omni::Scene* &nextScene = appState.nextScene;
+    if (!nextScene) return SDL_APP_SUCCESS;
+    Omni::Scene* &currentScene = appState.currentScene;
+
+    // Changing Scenes: Dispose and free current scene, initialize the next scene and set it as current
+    if (currentScene != nextScene) {
+        if (currentScene->dispose())
+            delete currentScene;
+        nextScene->init();
+        currentScene = nextScene;
+    }
+
+    // Called here to ensure the current scene and next scene always match to free memory from both properly
+    // This also allows init() to be called before dispose() outside the game loop
+    if (appState.quit) return SDL_APP_SUCCESS;
+
+    // Update the global render functions and the current scene, mark the next scene for any potential changes
+    PreRender(dt);
+    nextScene = currentScene->render(dt);
+    PostRender(dt);
+#else
+    if (appState.quit || !Render(dt))
+        return SDL_APP_SUCCESS;
+#endif
+
+    return SDL_APP_CONTINUE;
+}
+
+/* This function runs once at shutdown; SDL will clean up the window/renderer for us. */
+inline void SDL_AppQuit(void *appstate, SDL_AppResult result) {
+#ifdef OMNI_SCENE
+    // Dispose remaining scene (if available)
+    Omni::Scene* &currentScene = ((AppState*) appstate)->currentScene;
     if (currentScene && currentScene->dispose()) {
         delete currentScene;
         currentScene = nullptr;
-        nextScene = nullptr;
+        ((AppState*) appstate)->nextScene = nullptr;
     }
-#else
-    // Standard Game Loop
-    while (!WindowShouldClose() && Render(GetFrameTime()));
 #endif
-
-    // De-Initialization
     Dispose();
-    CloseWindow();
 }
