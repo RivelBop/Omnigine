@@ -35,7 +35,7 @@ if (NOT raylib_FOUND) # If there's none, fetch and build raylib
 endif()
 
 # SDL3 Dependencies
-set(SDL3_VERSION 3.4.8)
+set(SDL3_VERSION 3.4.10)
 find_package(SDL3 ${SDL3_VERSION} QUIET)
 if (NOT SDL3_FOUND)
   include(FetchContent)
