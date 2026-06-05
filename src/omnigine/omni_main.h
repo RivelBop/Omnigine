@@ -1,3 +1,7 @@
+/*
+ * This file must only be included in exactly ONE .cpp file!
+ */
+
 #pragma once
 
 /* ==================== IMPORTS ==================== */
@@ -42,15 +46,6 @@ namespace {
         int height = 480;
         /** The window flags to pass into SDL_CreateWindowAndRenderer(), no flags by default. */
         SDL_WindowFlags windowFlags = 0;
-
-        /* ========== VIEWPORT ========== */
-
-        /** The width of the logical resolution. */
-        int viewportWidth = width;
-        /** The height of the logical resolution. */
-        int viewportHeight = height;
-        /** The viewport for the global renderer. */
-        Omni::Viewport viewport = Omni::SCREEN_VIEWPORT;
 
         /* ========== COPYING & MOVING ========== */
 
@@ -100,19 +95,44 @@ static bool Render(float dt);
 /** Called once in SDL3's AppQuit callback function. */
 static void Dispose();
 
-/* ==================== APP STATE ==================== */
+/* ==================== INTERNAL ==================== */
 
 namespace {
-    /** Prevents the user from altering and potentially breaking the app's state; static in SDL_AppInit. */
-    struct AppState {
+    namespace internal {
+        /** Prevents the user from altering and potentially breaking the app's state; static in SDL_AppInit. */
+        struct AppState {
+            SDL_Window *window = nullptr;
+            SDL_Renderer *renderer = nullptr;
+            bool quit = false;
+#ifdef OMNI_SCENE
+            Omni::Scene *currentScene = nullptr;
+            Omni::Scene *nextScene = nullptr;
+#endif
+        };
+
         SDL_Window *window = nullptr;
         SDL_Renderer *renderer = nullptr;
-        bool quit = false;
-#ifdef OMNI_SCENE
-        Omni::Scene *currentScene = nullptr;
-        Omni::Scene *nextScene = nullptr;
-#endif
-    };
+        float deltaTime = 0.0f;
+        Uint32 fps = 0;
+    }
+}
+
+/* ==================== OMNI DEFINITIONS ==================== */
+
+inline SDL_Window *Omni::Window() {
+    return internal::window;
+}
+
+inline SDL_Renderer *Omni::Renderer() {
+    return internal::renderer;
+}
+
+inline float Omni::DeltaTime() {
+    return internal::deltaTime;
+}
+
+inline Uint32 Omni::FPS() {
+    return internal::fps;
 }
 
 /* ==================== SDL3 CALLBACK SETUP ==================== */
@@ -127,24 +147,29 @@ inline SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[]) {
 
     // Set the initialization flags, VIDEO and GAMEPAD are always enabled
     if (!SDL_Init(properties.initFlags | SDL_INIT_VIDEO | SDL_INIT_GAMEPAD)) {
-        SDL_Log("Couldn't initialize SDL: %s", SDL_GetError());
+        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't initialize SDL: %s", SDL_GetError());
         return SDL_APP_FAILURE;
     }
 
     // Create the app state to hide from user
-    static AppState appState;
+    static internal::AppState appState;
     *appstate = &appState;
 
     // Create a window with the provided title, size, and flags; also create a renderer
     if (!SDL_CreateWindowAndRenderer(properties.title, properties.width, properties.height, properties.windowFlags,
         &appState.window, &appState.renderer)) {
-        SDL_Log("Couldn't create window/renderer: %s", SDL_GetError());
+        SDL_LogError(SDL_LOG_CATEGORY_VIDEO, "Couldn't create window/renderer: %s", SDL_GetError());
         return SDL_APP_FAILURE;
     }
 
-    // Configure the viewport
-    SDL_SetRenderLogicalPresentation(appState.renderer, properties.viewportWidth, properties.viewportHeight,
-        properties.viewport);
+    // Provide the window and renderer to allow correct functionality for Omni::Window() and Omni::Renderer().
+    internal::window = appState.window;
+    internal::renderer = appState.renderer;
+
+    // Use screen viewport as default
+    int w, h;
+    SDL_GetWindowSizeInPixels(appState.window, &w, &h);
+    SDL_SetRenderLogicalPresentation(appState.renderer, w, h, SDL_LOGICAL_PRESENTATION_DISABLED);
 
     // After SDL3 and the window are prepared, call the user's Init() function
 #ifdef OMNI_SCENE
@@ -164,7 +189,7 @@ inline SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[]) {
 /* This function runs when a new event (mouse input, keypresses, etc.) occurs. */
 inline SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event) {
     if (event->type == SDL_EVENT_QUIT) {
-        ((AppState*) appstate)->quit = true;
+        ((internal::AppState*) appstate)->quit = true;
         return SDL_APP_CONTINUE;
     }
 
@@ -177,23 +202,25 @@ inline SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event) {
 inline SDL_AppResult SDL_AppIterate(void *appstate) {
     static Uint64 startDt = SDL_GetTicksNS();
     static Uint64 startFps = startDt;
+    static Uint32 frames = 0;
     const Uint64 end = SDL_GetTicksNS();
 
     // Calculate delta time
-    float dt = (end - startDt) / 1e9f;
+    internal::deltaTime = (end - startDt) / 1e9f;
     startDt = end;
 
     // Calculate FPS every 100 ms
-    Uint64 fpsElapsed = end - startFps;
-    if (fpsElapsed > 100000000) {
-        // TODO: Provide the FPS data to the player
-        Uint64 fps = 100000000 / fpsElapsed;
+    if (end - startFps > 100000000) {
+        internal::fps = frames * 10;
         startFps = end;
+        frames = 0;
     }
+    frames += 1;
 
-    AppState &appState = *(AppState*) appstate;
+    internal::AppState &appState = *(internal::AppState*) appstate;
 
-    // Clear the window to the draw color (automatic for the user)
+    // Clear the window to black (automatic for the user)
+    SDL_SetRenderDrawColor(appState.renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
     SDL_RenderClear(appState.renderer);
 
 #ifdef OMNI_SCENE
@@ -214,13 +241,19 @@ inline SDL_AppResult SDL_AppIterate(void *appstate) {
     if (appState.quit) return SDL_APP_SUCCESS;
 
     // Update the global render functions and the current scene, mark the next scene for any potential changes
-    PreRender(dt);
-    nextScene = currentScene->render(dt);
-    PostRender(dt);
+    PreRender(internal::deltaTime);
+    nextScene = currentScene->render(internal::deltaTime);
+    PostRender(internal::deltaTime);
 #else
-    if (appState.quit || !Render(dt))
+    if (appState.quit || !Render(internal::deltaTime))
         return SDL_APP_SUCCESS;
 #endif
+
+    // Reset back to the screen viewport and automatically draw what is currently in the renderer
+    int w, h;
+    SDL_GetWindowSizeInPixels(appState.window, &w, &h);
+    SDL_SetRenderLogicalPresentation(appState.renderer, w, h, SDL_LOGICAL_PRESENTATION_DISABLED);
+    SDL_RenderPresent(appState.renderer);
 
     return SDL_APP_CONTINUE;
 }
@@ -229,11 +262,11 @@ inline SDL_AppResult SDL_AppIterate(void *appstate) {
 inline void SDL_AppQuit(void *appstate, SDL_AppResult result) {
 #ifdef OMNI_SCENE
     // Dispose remaining scene (if available)
-    Omni::Scene* &currentScene = ((AppState*) appstate)->currentScene;
+    Omni::Scene* &currentScene = ((internal::AppState*) appstate)->currentScene;
     if (currentScene && currentScene->dispose()) {
         delete currentScene;
         currentScene = nullptr;
-        ((AppState*) appstate)->nextScene = nullptr;
+        ((internal::AppState*) appstate)->nextScene = nullptr;
     }
 #endif
     Dispose();

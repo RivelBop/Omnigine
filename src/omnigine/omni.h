@@ -23,15 +23,10 @@ namespace Omni {
         return SDL_SetRenderLogicalPresentation(Renderer(), width, height, viewport);
     }
 
-    /** Calls SDL_SetRenderLogicalPresentation() for the specified SDL_Renderer. */
-    inline bool SetViewport(SDL_Renderer *renderer, const int width, const int height, const Viewport viewport) {
-        return SDL_SetRenderLogicalPresentation(renderer, width, height, viewport);
-    }
-
     /* ==================== GAME LOOP ==================== */
 
     /** Returns the time it took for the previous frame to complete and start the next frame. */
     [[nodiscard]] float DeltaTime();
     /** Returns frames per second. */
-    [[nodiscard]] int FPS();
+    [[nodiscard]] Uint32 FPS();
 }
