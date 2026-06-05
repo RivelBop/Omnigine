@@ -167,9 +167,7 @@ inline SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[]) {
     internal::renderer = appState.renderer;
 
     // Use screen viewport as default
-    int w, h;
-    SDL_GetWindowSizeInPixels(appState.window, &w, &h);
-    SDL_SetRenderLogicalPresentation(appState.renderer, w, h, SDL_LOGICAL_PRESENTATION_DISABLED);
+    SDL_SetRenderLogicalPresentation(appState.renderer, 0, 0, SDL_LOGICAL_PRESENTATION_DISABLED);
 
     // After SDL3 and the window are prepared, call the user's Init() function
 #ifdef OMNI_SCENE
@@ -249,10 +247,7 @@ inline SDL_AppResult SDL_AppIterate(void *appstate) {
         return SDL_APP_SUCCESS;
 #endif
 
-    // Reset back to the screen viewport and automatically draw what is currently in the renderer
-    int w, h;
-    SDL_GetWindowSizeInPixels(appState.window, &w, &h);
-    SDL_SetRenderLogicalPresentation(appState.renderer, w, h, SDL_LOGICAL_PRESENTATION_DISABLED);
+    // Automatically draw what is currently in the renderer
     SDL_RenderPresent(appState.renderer);
 
     return SDL_APP_CONTINUE;
