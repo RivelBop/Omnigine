@@ -48,6 +48,23 @@ if (NOT SDL3_FOUND)
   endif()
 endif()
 
+# SDL3_image Dependencies
+set(SDL3_IMAGE_VERSION 3.4.4)
+find_package(SDL3_image ${SDL3_IMAGE_VERSION} QUIET)
+if (NOT SDL3_image_FOUND)
+  include(FetchContent)
+  FetchContent_Declare(
+          SDL3_image
+          DOWNLOAD_EXTRACT_TIMESTAMP OFF
+          URL https://github.com/libsdl-org/SDL_image/archive/refs/tags/release-${SDL3_IMAGE_VERSION}.tar.gz
+  )
+  FetchContent_GetProperties(SDL3_image)
+  if (NOT SDL3_image_POPULATED)
+    set(FETCHCONTENT_QUIET NO)
+    FetchContent_MakeAvailable(SDL3_image)
+  endif()
+endif()
+
 # Our Project
 add_executable(${PROJECT_NAME} src/main.cpp
         src/omnigine/omni_main.h
@@ -57,7 +74,7 @@ add_executable(${PROJECT_NAME} src/main.cpp
         src/omnigine/omni_assets.h
 )
 
-target_link_libraries(${PROJECT_NAME} PRIVATE raylib SDL3::SDL3)
+target_link_libraries(${PROJECT_NAME} PRIVATE raylib SDL3::SDL3 SDL3_image::SDL3_image)
 
 # Web Configurations
 if (${PLATFORM} STREQUAL "Web")
