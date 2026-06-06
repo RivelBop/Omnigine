@@ -65,6 +65,23 @@ if (NOT SDL3_image_FOUND)
   endif()
 endif()
 
+# SDL3_ttf Dependencies
+set(SDL3_TTF_VERSION 3.2.2)
+find_package(SDL3_ttf ${SDL3_TTF_VERSION} QUIET)
+if (NOT SDL3_ttf_FOUND)
+  include(FetchContent)
+  FetchContent_Declare(
+          SDL3_ttf
+          DOWNLOAD_EXTRACT_TIMESTAMP OFF
+          URL https://github.com/libsdl-org/SDL_ttf/archive/refs/tags/release-${SDL3_TTF_VERSION}.tar.gz
+  )
+  FetchContent_GetProperties(SDL3_ttf)
+  if (NOT SDL3_ttf_POPULATED)
+    set(FETCHCONTENT_QUIET NO)
+    FetchContent_MakeAvailable(SDL3_ttf)
+  endif()
+endif()
+
 # Our Project
 add_executable(${PROJECT_NAME} src/main.cpp
         src/omnigine/omni_main.h
@@ -74,7 +91,7 @@ add_executable(${PROJECT_NAME} src/main.cpp
         src/omnigine/omni_assets.h
 )
 
-target_link_libraries(${PROJECT_NAME} PRIVATE raylib SDL3::SDL3 SDL3_image::SDL3_image)
+target_link_libraries(${PROJECT_NAME} PRIVATE raylib SDL3::SDL3 SDL3_image::SDL3_image SDL3_ttf::SDL3_ttf)
 
 # Web Configurations
 if (${PLATFORM} STREQUAL "Web")
