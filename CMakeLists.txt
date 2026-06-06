@@ -14,9 +14,6 @@ endif()
 # Generate compile_commands.json (useful for IDEs)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-# Always build static libs to avoid missing symbol issues
-set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
-
 # Raylib Dependencies (soon to be replaced by SDL3)
 set(RAYLIB_VERSION 6.0)
 find_package(raylib ${RAYLIB_VERSION} QUIET) # QUIET or REQUIRED
