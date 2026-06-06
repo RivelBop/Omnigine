@@ -103,15 +103,30 @@ namespace {
         struct AppState {
             SDL_Window *window = nullptr;
             SDL_Renderer *renderer = nullptr;
+
             bool quit = false;
+            bool keysPressed[SDL_SCANCODE_COUNT] = {};
+            bool keysJustPressed[SDL_SCANCODE_COUNT] = {};
+            bool keyPressed = false;
+
 #ifdef OMNI_SCENE
             Omni::Scene *currentScene = nullptr;
             Omni::Scene *nextScene = nullptr;
 #endif
         };
 
+        /* ========== SDL_AppInit ========== */
+
         SDL_Window *window = nullptr;
         SDL_Renderer *renderer = nullptr;
+
+        /* ========== SDL_AppEvent ========== */
+
+        const bool *keysPressed = nullptr;
+        const bool *keysJustPressed = nullptr;
+
+        /* ========== SDL_AppIterate ========== */
+
         float deltaTime = 0.0f;
         Uint32 fps = 0;
     }
@@ -125,6 +140,22 @@ inline SDL_Window *Omni::Window() {
 
 inline SDL_Renderer *Omni::Renderer() {
     return internal::renderer;
+}
+
+inline bool Omni::IsKeyPressed(SDL_Scancode key) {
+    return internal::keysPressed[key];
+}
+
+inline bool Omni::IsKeyPressed(SDL_Keycode key) {
+    return internal::keysPressed[SDL_GetScancodeFromKey(key, nullptr)];
+}
+
+inline bool Omni::IsKeyJustPressed(SDL_Scancode key) {
+    return internal::keysJustPressed[key];
+}
+
+inline bool Omni::IsKeyJustPressed(SDL_Keycode key) {
+    return internal::keysJustPressed[SDL_GetScancodeFromKey(key, nullptr)];
 }
 
 inline float Omni::DeltaTime() {
@@ -162,9 +193,13 @@ inline SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[]) {
         return SDL_APP_FAILURE;
     }
 
-    // Provide the window and renderer to allow correct functionality for Omni::Window() and Omni::Renderer().
+    // Provide the window and renderer to allow correct functionality for Omni::Window() and Omni::Renderer()
     internal::window = appState.window;
     internal::renderer = appState.renderer;
+
+    // Provide the input arrays to allow correct and safe functionality for Omni input getters
+    internal::keysPressed = appState.keysPressed;
+    internal::keysJustPressed = appState.keysJustPressed;
 
     // Use screen viewport as default
     SDL_SetRenderLogicalPresentation(appState.renderer, 0, 0, SDL_LOGICAL_PRESENTATION_DISABLED);
@@ -186,12 +221,25 @@ inline SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[]) {
 
 /* This function runs when a new event (mouse input, keypresses, etc.) occurs. */
 inline SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event) {
+    internal::AppState &appState = *(internal::AppState*) appstate;
+
     if (event->type == SDL_EVENT_QUIT) {
-        ((internal::AppState*) appstate)->quit = true;
+        appState.quit = true;
         return SDL_APP_CONTINUE;
     }
 
-    // TODO: Listen for and store inputs
+    if (event->type == SDL_EVENT_KEY_DOWN) {
+        SDL_Scancode key = event->key.scancode;
+        if (!appState.keysPressed[key]) {
+            appState.keysPressed[key] = true;
+            appState.keysJustPressed[key] = true;
+            appState.keyPressed = true;
+        }
+    } else if (event->type == SDL_EVENT_KEY_UP) {
+        SDL_Scancode key = event->key.scancode;
+        appState.keysPressed[key] = false;
+        appState.keysJustPressed[key] = false;
+    }
 
     return SDL_APP_CONTINUE;
 }
@@ -249,6 +297,13 @@ inline SDL_AppResult SDL_AppIterate(void *appstate) {
 
     // Automatically draw what is currently in the renderer
     SDL_RenderPresent(appState.renderer);
+
+    if (appState.keyPressed) {
+        for (int i = 0; i < SDL_SCANCODE_COUNT; i++) {
+            appState.keysJustPressed[i] = false;
+        }
+        appState.keyPressed = false;
+    }
 
     return SDL_APP_CONTINUE;
 }
