@@ -11,6 +11,9 @@
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
 
+#define MINIAUDIO_IMPLEMENTATION
+#include <miniaudio.h>
+
 #include "omni.h"
 
 #ifdef OMNI_SCENE
@@ -103,6 +106,7 @@ namespace {
         struct AppState {
             SDL_Window *window = nullptr;
             SDL_Renderer *renderer = nullptr;
+            ma_engine *soundEngine = nullptr;
 
             bool quit = false;
             bool keysPressed[SDL_SCANCODE_COUNT] = {};
@@ -170,6 +174,10 @@ inline Uint32 Omni::FPS() {
 
 /* Runs once at startup. */
 inline SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[]) {
+    // Create the app state to hide from user
+    static internal::AppState appState;
+    *appstate = &appState;
+
     // Get the user's window configuration
     const WindowProperties properties = InitWindow(argc, argv);
 
@@ -181,10 +189,6 @@ inline SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[]) {
         SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't initialize SDL: %s", SDL_GetError());
         return SDL_APP_FAILURE;
     }
-
-    // Create the app state to hide from user
-    static internal::AppState appState;
-    *appstate = &appState;
 
     // Create a window with the provided title, size, and flags; also create a renderer
     if (!SDL_CreateWindowAndRenderer(properties.title, properties.width, properties.height, properties.windowFlags,
@@ -204,15 +208,21 @@ inline SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[]) {
     // Use screen viewport as default
     SDL_SetRenderLogicalPresentation(appState.renderer, 0, 0, SDL_LOGICAL_PRESENTATION_DISABLED);
 
-    // After SDL3 and the window are prepared, call the user's Init() function
+    // Initialize miniaudio engine
+    appState.soundEngine = new ma_engine;
+    if (ma_engine_init(nullptr, appState.soundEngine) != MA_SUCCESS) {
+        delete appState.soundEngine;
+        appState.soundEngine = nullptr;
+        return SDL_APP_FAILURE;
+    }
+
+    // After SDL3, the window, and miniaudio are prepared, call the user's Init() function
 #ifdef OMNI_SCENE
     Omni::Scene* &currentScene = appState.currentScene;
-    Omni::Scene* &nextScene = appState.nextScene;
-
     currentScene = Init(argc, argv);
     if (currentScene)
         currentScene->init();
-    nextScene = currentScene;
+    appState.nextScene = currentScene;
     return currentScene ? SDL_APP_CONTINUE : SDL_APP_FAILURE;
 #else
     return Init(argc, argv) ? SDL_APP_CONTINUE : SDL_APP_FAILURE;
@@ -310,14 +320,22 @@ inline SDL_AppResult SDL_AppIterate(void *appstate) {
 
 /* This function runs once at shutdown; SDL will clean up the window/renderer for us. */
 inline void SDL_AppQuit(void *appstate, SDL_AppResult result) {
+    internal::AppState &appState = *(internal::AppState*) appstate;
 #ifdef OMNI_SCENE
     // Dispose remaining scene (if available)
-    Omni::Scene* &currentScene = ((internal::AppState*) appstate)->currentScene;
+    Omni::Scene* &currentScene = appState.currentScene;
     if (currentScene && currentScene->dispose()) {
         delete currentScene;
         currentScene = nullptr;
-        ((internal::AppState*) appstate)->nextScene = nullptr;
+        appState.nextScene = nullptr;
     }
 #endif
-    Dispose();
+    // Since the sound engine loads last, Init() is called right after so Dispose() must be called
+    ma_engine* &soundEngine = appState.soundEngine;
+    if (soundEngine) {
+        Dispose();
+        ma_engine_uninit(soundEngine);
+        delete soundEngine;
+        soundEngine = nullptr;
+    }
 }

@@ -82,6 +82,23 @@ if (NOT SDL3_ttf_FOUND)
   endif()
 endif()
 
+# miniaudio Dependencies
+set(MINIAUDIO_VERSION 0.11.25)
+find_package(miniaudio ${MINIAUDIO_VERSION} QUIET)
+if (NOT miniaudio_FOUND)
+  include(FetchContent)
+  FetchContent_Declare(
+          miniaudio
+          DOWNLOAD_EXTRACT_TIMESTAMP OFF
+          URL https://github.com/mackron/miniaudio/archive/refs/tags/${MINIAUDIO_VERSION}.tar.gz
+  )
+  FetchContent_GetProperties(miniaudio)
+  if (NOT miniaudio_POPULATED)
+    set(FETCHCONTENT_QUIET NO)
+    FetchContent_MakeAvailable(miniaudio)
+  endif()
+endif()
+
 # Our Project
 add_executable(${PROJECT_NAME} src/main.cpp
         src/omnigine/omni_main.h
@@ -91,7 +108,7 @@ add_executable(${PROJECT_NAME} src/main.cpp
         src/omnigine/omni_assets.h
 )
 
-target_link_libraries(${PROJECT_NAME} PRIVATE raylib SDL3::SDL3 SDL3_image::SDL3_image SDL3_ttf::SDL3_ttf)
+target_link_libraries(${PROJECT_NAME} PRIVATE raylib SDL3::SDL3 SDL3_image::SDL3_image SDL3_ttf::SDL3_ttf miniaudio)
 
 # Web Configurations
 if (${PLATFORM} STREQUAL "Web")
