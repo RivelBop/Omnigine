@@ -32,6 +32,10 @@ namespace Omni {
         float zoom = 1.0f;
     };
 
+    /**
+     * Projects the renderer to a camera, copies the camera internally so future camera updates must re-call this function.
+     * Pass a nullptr to reset the renderer back to default values (x:0, y:0, scale:1).
+     */
     void RenderToCamera(const Camera *camera);
 
     bool RenderPoint(float x, float y);
