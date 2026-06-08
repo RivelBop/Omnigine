@@ -38,6 +38,16 @@ cmake -B build
 cmake --build build
 ```
 
+Before running these commands on Windows, make sure to install and setup the following (for AVIF support):
+
+##### NASM Assembler
+1. Run `winget install NASM.NASM` in cmd or powershell.
+2. Add `C:\Users\%USERNAME%\AppData\Local\bin\NASM` to your user `PATH`.
+
+##### Perl
+1. Run `winget install StrawberryPerl.StrawberryPerl` in cmd or powershell.
+2. To prevent CMake issues, remove `C:\Strawberry\c\bin` from your system `PATH`.
+
 #### Web
 
 Compiling for the web requires the [Emscripten SDK](https://emscripten.org/docs/getting_started/downloads.html).

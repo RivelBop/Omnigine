@@ -55,8 +55,10 @@ if (NOT SDL3_image_FOUND)
   include(FetchContent)
   FetchContent_Declare(
           SDL3_image
-          DOWNLOAD_EXTRACT_TIMESTAMP OFF
-          URL https://github.com/libsdl-org/SDL_image/archive/refs/tags/release-${SDL3_IMAGE_VERSION}.tar.gz
+          GIT_REPOSITORY https://github.com/libsdl-org/SDL_image.git
+          GIT_TAG release-${SDL3_IMAGE_VERSION}
+          GIT_PROGRESS TRUE
+          # CMake fetches all submodules by default when using GIT_REPOSITORY
   )
   FetchContent_GetProperties(SDL3_image)
   if (NOT SDL3_image_POPULATED)
@@ -72,8 +74,9 @@ if (NOT SDL3_ttf_FOUND)
   include(FetchContent)
   FetchContent_Declare(
           SDL3_ttf
-          DOWNLOAD_EXTRACT_TIMESTAMP OFF
-          URL https://github.com/libsdl-org/SDL_ttf/archive/refs/tags/release-${SDL3_TTF_VERSION}.tar.gz
+          GIT_REPOSITORY https://github.com/libsdl-org/SDL_ttf.git
+          GIT_TAG release-${SDL3_TTF_VERSION}
+          GIT_PROGRESS TRUE
   )
   FetchContent_GetProperties(SDL3_ttf)
   if (NOT SDL3_ttf_POPULATED)
