@@ -133,10 +133,16 @@ namespace {
 
         float deltaTime = 0.0f;
         Uint32 fps = 0;
+
+        /* ========== Misc. ========== */
+
+        Omni::Camera camera;
     }
 }
 
 /* ==================== OMNI DEFINITIONS ==================== */
+
+/* ========== WINDOW & RENDERER ========== */
 
 inline SDL_Window *Omni::Window() {
     return internal::window;
@@ -145,6 +151,25 @@ inline SDL_Window *Omni::Window() {
 inline SDL_Renderer *Omni::Renderer() {
     return internal::renderer;
 }
+
+/* ========== CAMERA ========== */
+
+inline void Omni::RenderToCamera(const Omni::Camera *camera) {
+    Omni::Camera &cam = internal::camera;
+
+    // Copy the provided camera's data into the internal camera and set the renderer's scale
+    if (camera) {
+        cam = *camera;
+        SDL_SetRenderScale(internal::renderer, cam.zoom, cam.zoom);
+        return;
+    }
+
+    // Reset the internal camera and set renderer scale back to default
+    cam = {};
+    SDL_SetRenderScale(internal::renderer, 1, 1);
+}
+
+/* ========== INPUTS ========== */
 
 inline bool Omni::IsKeyPressed(SDL_Scancode key) {
     return internal::keysPressed[key];
@@ -161,6 +186,8 @@ inline bool Omni::IsKeyJustPressed(SDL_Scancode key) {
 inline bool Omni::IsKeyJustPressed(SDL_Keycode key) {
     return internal::keysJustPressed[SDL_GetScancodeFromKey(key, nullptr)];
 }
+
+/* ========== GAME LOOP ========== */
 
 inline float Omni::DeltaTime() {
     return internal::deltaTime;
