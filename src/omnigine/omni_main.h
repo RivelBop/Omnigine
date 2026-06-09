@@ -179,6 +179,11 @@ inline void Omni::RenderToCamera(const Omni::Camera *camera)
     SDL_SetRenderScale(internal::renderer, 1, 1);
 }
 
+inline bool Omni::RenderPoint(float x, float y)
+{
+    return SDL_RenderPoint(internal::renderer, x - internal::camera.x, y - internal::camera.y);
+}
+
 /* ========== INPUTS ========== */
 
 inline bool Omni::IsKeyPressed(SDL_Scancode key)

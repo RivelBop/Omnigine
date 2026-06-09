@@ -41,6 +41,7 @@ struct Camera
  */
 void RenderToCamera(const Camera *camera);
 
+/** Renders a point through the camera to the renderer. */
 bool RenderPoint(float x, float y);
 
 bool RenderPoints(const SDL_FPoint *points, int count);
