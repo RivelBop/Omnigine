@@ -22,56 +22,60 @@
 
 /* ==================== WINDOW PROPERTIES ==================== */
 
-namespace {
-    /** Window configuration settings. */
-    struct WindowProperties {
-        /* ========== METADATA ========== */
+namespace
+{
+/** Window configuration settings. */
+struct WindowProperties
+{
+    /* ========== METADATA ========== */
 
-        /** App name in metadata, can be null. */
-        const char *appName = nullptr;
-        /** App version in metadata, can be null. */
-        const char *appVersion = nullptr;
-        /** App ID in metadata, can be null. */
-        const char *appIdentifier = nullptr;
+    /** App name in metadata, can be null. */
+    const char *appName = nullptr;
+    /** App version in metadata, can be null. */
+    const char *appVersion = nullptr;
+    /** App ID in metadata, can be null. */
+    const char *appIdentifier = nullptr;
 
-        /* ========== INIT FLAGS ========== */
+    /* ========== INIT FLAGS ========== */
 
-        /** The flags to pass into SDL_Init(), (VIDEO | GAMEPAD) are enabled automatically. */
-        SDL_InitFlags initFlags = 0;
+    /** The flags to pass into SDL_Init(), (VIDEO | GAMEPAD) are enabled automatically. */
+    SDL_InitFlags initFlags = 0;
 
-        /* ========== WINDOW ========== */
+    /* ========== WINDOW ========== */
 
-        /** The window title, can be null. */
-        const char *title = nullptr;
-        /** The window width. */
-        int width = 640;
-        /** The window height. */
-        int height = 480;
-        /** The window flags to pass into SDL_CreateWindowAndRenderer(), no flags by default. */
-        SDL_WindowFlags windowFlags = 0;
+    /** The window title, can be null. */
+    const char *title = nullptr;
+    /** The window width. */
+    int width = 640;
+    /** The window height. */
+    int height = 480;
+    /** The window flags to pass into SDL_CreateWindowAndRenderer(), no flags by default. */
+    SDL_WindowFlags windowFlags = 0;
 
-        /* ========== COPYING & MOVING ========== */
+    /* ========== COPYING & MOVING ========== */
 
-        WindowProperties(const WindowProperties &) = delete;
-        WindowProperties &operator=(const WindowProperties &) = delete;
-        WindowProperties(WindowProperties &&) = delete;
-        WindowProperties &operator=(WindowProperties &&) = delete;
+    WindowProperties(const WindowProperties &) = delete;
+    WindowProperties &operator=(const WindowProperties &) = delete;
+    WindowProperties(WindowProperties &&) = delete;
+    WindowProperties &operator=(WindowProperties &&) = delete;
 
-        /* ========== OPERATORS ========== */
+    /* ========== OPERATORS ========== */
 
-        /** Add to the init flags. */
-        WindowProperties &operator|=(const SDL_InitFlags addInitFlags) {
-            initFlags |= addInitFlags;
-            return *this;
-        }
+    /** Add to the init flags. */
+    WindowProperties &operator|=(const SDL_InitFlags addInitFlags)
+    {
+        initFlags |= addInitFlags;
+        return *this;
+    }
 
-        /** Add to the window flags. */
-        WindowProperties &operator|=(const SDL_WindowFlags addWindowFlags) {
-            windowFlags |= addWindowFlags;
-            return *this;
-        }
-    };
-}
+    /** Add to the window flags. */
+    WindowProperties &operator|=(const SDL_WindowFlags addWindowFlags)
+    {
+        windowFlags |= addWindowFlags;
+        return *this;
+    }
+};
+} // namespace
 
 /* ==================== USER FUNCTIONS ==================== */
 
@@ -100,61 +104,67 @@ static void Dispose();
 
 /* ==================== INTERNAL ==================== */
 
-namespace {
-    namespace internal {
-        /** Prevents the user from altering and potentially breaking the app's state; static in SDL_AppInit. */
-        struct AppState {
-            SDL_Window *window = nullptr;
-            SDL_Renderer *renderer = nullptr;
-            ma_engine *soundEngine = nullptr;
+namespace
+{
+namespace internal
+{
+/** Prevents the user from altering and potentially breaking the app's state; static in SDL_AppInit. */
+struct AppState
+{
+    SDL_Window *window = nullptr;
+    SDL_Renderer *renderer = nullptr;
+    ma_engine *soundEngine = nullptr;
 
-            bool quit = false;
-            bool keysPressed[SDL_SCANCODE_COUNT] = {};
-            bool keysJustPressed[SDL_SCANCODE_COUNT] = {};
-            bool keyPressed = false;
+    bool quit = false;
+    bool keysPressed[SDL_SCANCODE_COUNT] = {};
+    bool keysJustPressed[SDL_SCANCODE_COUNT] = {};
+    bool keyPressed = false;
 
 #ifdef OMNI_SCENE
-            Omni::Scene *currentScene = nullptr;
-            Omni::Scene *nextScene = nullptr;
+    Omni::Scene *currentScene = nullptr;
+    Omni::Scene *nextScene = nullptr;
 #endif
-        };
+};
 
-        /* ========== SDL_AppInit ========== */
+/* ========== SDL_AppInit ========== */
 
-        SDL_Window *window = nullptr;
-        SDL_Renderer *renderer = nullptr;
+SDL_Window *window = nullptr;
+SDL_Renderer *renderer = nullptr;
 
-        /* ========== SDL_AppEvent ========== */
+/* ========== SDL_AppEvent ========== */
 
-        const bool *keysPressed = nullptr;
-        const bool *keysJustPressed = nullptr;
+const bool *keysPressed = nullptr;
+const bool *keysJustPressed = nullptr;
 
-        /* ========== SDL_AppIterate ========== */
+/* ========== SDL_AppIterate ========== */
 
-        float deltaTime = 0.0f;
-        Uint32 fps = 0;
+float deltaTime = 0.0f;
+Uint32 fps = 0;
 
-        /* ========== Misc. ========== */
+/* ========== Misc. ========== */
 
-        Omni::Camera camera;
-    }
-}
+Omni::Camera camera;
+} // namespace internal
+} // namespace
 
 /* ==================== OMNI DEFINITIONS ==================== */
 
 /* ========== WINDOW & RENDERER ========== */
 
-inline SDL_Window *Omni::Window() {
+inline SDL_Window *Omni::Window()
+{
     return internal::window;
 }
 
-inline SDL_Renderer *Omni::Renderer() {
+inline SDL_Renderer *Omni::Renderer()
+{
     return internal::renderer;
 }
 
 /* ========== CAMERA ========== */
 
-inline void Omni::RenderToCamera(const Omni::Camera *camera) {
+inline void Omni::RenderToCamera(const Omni::Camera *camera)
+{
     Omni::Camera &cam = internal::camera;
 
     // Copy the provided camera's data into the internal camera and set the renderer's scale
@@ -171,36 +181,43 @@ inline void Omni::RenderToCamera(const Omni::Camera *camera) {
 
 /* ========== INPUTS ========== */
 
-inline bool Omni::IsKeyPressed(SDL_Scancode key) {
+inline bool Omni::IsKeyPressed(SDL_Scancode key)
+{
     return internal::keysPressed[key];
 }
 
-inline bool Omni::IsKeyPressed(SDL_Keycode key) {
+inline bool Omni::IsKeyPressed(SDL_Keycode key)
+{
     return internal::keysPressed[SDL_GetScancodeFromKey(key, nullptr)];
 }
 
-inline bool Omni::IsKeyJustPressed(SDL_Scancode key) {
+inline bool Omni::IsKeyJustPressed(SDL_Scancode key)
+{
     return internal::keysJustPressed[key];
 }
 
-inline bool Omni::IsKeyJustPressed(SDL_Keycode key) {
+inline bool Omni::IsKeyJustPressed(SDL_Keycode key)
+{
     return internal::keysJustPressed[SDL_GetScancodeFromKey(key, nullptr)];
 }
 
 /* ========== GAME LOOP ========== */
 
-inline float Omni::DeltaTime() {
+inline float Omni::DeltaTime()
+{
     return internal::deltaTime;
 }
 
-inline Uint32 Omni::FPS() {
+inline Uint32 Omni::FPS()
+{
     return internal::fps;
 }
 
 /* ==================== SDL3 CALLBACK SETUP ==================== */
 
 /* Runs once at startup. */
-inline SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[]) {
+inline SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
+{
     // Create the app state to hide from user
     static internal::AppState appState;
     *appstate = &appState;
@@ -219,7 +236,7 @@ inline SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[]) {
 
     // Create a window with the provided title, size, and flags; also create a renderer
     if (!SDL_CreateWindowAndRenderer(properties.title, properties.width, properties.height, properties.windowFlags,
-        &appState.window, &appState.renderer)) {
+                                     &appState.window, &appState.renderer)) {
         SDL_LogError(SDL_LOG_CATEGORY_VIDEO, "Couldn't create window/renderer: %s", SDL_GetError());
         return SDL_APP_FAILURE;
     }
@@ -245,7 +262,7 @@ inline SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[]) {
 
     // After SDL3, the window, and miniaudio are prepared, call the user's Init() function
 #ifdef OMNI_SCENE
-    Omni::Scene* &currentScene = appState.currentScene;
+    Omni::Scene *&currentScene = appState.currentScene;
     currentScene = Init(argc, argv);
     if (currentScene)
         currentScene->init();
@@ -257,8 +274,9 @@ inline SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[]) {
 }
 
 /* This function runs when a new event (mouse input, keypresses, etc.) occurs. */
-inline SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event) {
-    internal::AppState &appState = *(internal::AppState*) appstate;
+inline SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
+{
+    internal::AppState &appState = *(internal::AppState *)appstate;
 
     if (event->type == SDL_EVENT_QUIT) {
         appState.quit = true;
@@ -282,7 +300,8 @@ inline SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event) {
 }
 
 /* This function runs once per frame, and is the heart of the program. */
-inline SDL_AppResult SDL_AppIterate(void *appstate) {
+inline SDL_AppResult SDL_AppIterate(void *appstate)
+{
     static Uint64 startDt = SDL_GetTicksNS();
     static Uint64 startFps = startDt;
     static Uint32 frames = 0;
@@ -300,16 +319,17 @@ inline SDL_AppResult SDL_AppIterate(void *appstate) {
     }
     frames += 1;
 
-    internal::AppState &appState = *(internal::AppState*) appstate;
+    internal::AppState &appState = *(internal::AppState *)appstate;
 
     // Clear the window to black (automatic for the user)
     SDL_SetRenderDrawColor(appState.renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
     SDL_RenderClear(appState.renderer);
 
 #ifdef OMNI_SCENE
-    Omni::Scene* &nextScene = appState.nextScene;
-    if (!nextScene) return SDL_APP_SUCCESS;
-    Omni::Scene* &currentScene = appState.currentScene;
+    Omni::Scene *&nextScene = appState.nextScene;
+    if (!nextScene)
+        return SDL_APP_SUCCESS;
+    Omni::Scene *&currentScene = appState.currentScene;
 
     // Changing Scenes: Dispose and free current scene, initialize the next scene and set it as current
     if (currentScene != nextScene) {
@@ -321,7 +341,8 @@ inline SDL_AppResult SDL_AppIterate(void *appstate) {
 
     // Called here to ensure the current scene and next scene always match to free memory from both properly
     // This also allows init() to be called before dispose() outside the game loop
-    if (appState.quit) return SDL_APP_SUCCESS;
+    if (appState.quit)
+        return SDL_APP_SUCCESS;
 
     // Update the global render functions and the current scene, mark the next scene for any potential changes
     PreRender(internal::deltaTime);
@@ -346,11 +367,12 @@ inline SDL_AppResult SDL_AppIterate(void *appstate) {
 }
 
 /* This function runs once at shutdown; SDL will clean up the window/renderer for us. */
-inline void SDL_AppQuit(void *appstate, SDL_AppResult result) {
-    internal::AppState &appState = *(internal::AppState*) appstate;
+inline void SDL_AppQuit(void *appstate, SDL_AppResult result)
+{
+    internal::AppState &appState = *(internal::AppState *)appstate;
 #ifdef OMNI_SCENE
     // Dispose remaining scene (if available)
-    Omni::Scene* &currentScene = appState.currentScene;
+    Omni::Scene *&currentScene = appState.currentScene;
     if (currentScene && currentScene->dispose()) {
         delete currentScene;
         currentScene = nullptr;
@@ -358,7 +380,7 @@ inline void SDL_AppQuit(void *appstate, SDL_AppResult result) {
     }
 #endif
     // Since the sound engine loads last, Init() is called right after so Dispose() must be called
-    ma_engine* &soundEngine = appState.soundEngine;
+    ma_engine *&soundEngine = appState.soundEngine;
     if (soundEngine) {
         Dispose();
         ma_engine_uninit(soundEngine);
