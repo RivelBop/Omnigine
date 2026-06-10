@@ -208,6 +208,13 @@ inline bool Omni::RenderPoints(const SDL_FPoint *points, int count)
     return SDL_RenderPoints(internal::renderer, points, count);
 }
 
+inline bool Omni::RenderLine(float x1, float y1, float x2, float y2)
+{
+    float x = internal::camera.x;
+    float y = internal::camera.y;
+    return SDL_RenderLine(internal::renderer, x1 - x, y1 - y, x2 - x, y2 - y);
+}
+
 /* ========== INPUTS ========== */
 
 inline bool Omni::IsKeyPressed(SDL_Scancode key)
