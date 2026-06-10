@@ -215,6 +215,32 @@ inline bool Omni::RenderLine(float x1, float y1, float x2, float y2)
     return SDL_RenderLine(internal::renderer, x1 - x, y1 - y, x2 - x, y2 - y);
 }
 
+inline bool Omni::RenderLines(const SDL_FPoint *points, int count)
+{
+    // Ensure points are available and the camera is set to a non-default position
+    if (points && count > 1 && (internal::camera.x != 0 || internal::camera.y != 0)) {
+        float x = internal::camera.x;
+        float y = internal::camera.y;
+
+        // Create a camera-projected variant of each point
+        SDL_FPoint *camPoints = new SDL_FPoint[count];
+        for (int i = 0; i < count; i++) {
+            const SDL_FPoint &point = points[i];
+            SDL_FPoint &camPoint = camPoints[i];
+            camPoint.x = point.x - x;
+            camPoint.y = point.y - y;
+        }
+
+        // Render the camera-projected lines
+        bool result = SDL_RenderLines(internal::renderer, camPoints, count);
+        delete[] camPoints;
+        return result;
+    }
+
+    // Handles errors if not enough points provided and rendering with default camera position (0,0)
+    return SDL_RenderLines(internal::renderer, points, count);
+}
+
 /* ========== INPUTS ========== */
 
 inline bool Omni::IsKeyPressed(SDL_Scancode key)
