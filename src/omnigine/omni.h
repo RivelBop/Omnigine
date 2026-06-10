@@ -11,6 +11,24 @@ namespace Omni
 /** Access to the renderer pointer. */
 [[nodiscard]] SDL_Renderer *Renderer();
 
+/**
+ * Calls SDL_SetRenderDrawColor() for the global Renderer().
+ * Set each color to a value between 0-255.
+ */
+inline bool SetDrawColor(Uint8 r, Uint8 g, Uint8 b, Uint8 a)
+{
+    return SDL_SetRenderDrawColor(Renderer(), r, g, b, a);
+}
+
+/**
+ * Calls SDL_SetRenderDrawColorFloat() for the global Renderer().
+ * Set each color to a value between 0.0f-1.0f, calculated by dividing a value between 0-255 by 255.0f.
+ */
+inline bool SetDrawColor(float r, float g, float b, float a)
+{
+    return SDL_SetRenderDrawColorFloat(Renderer(), r, g, b, a);
+}
+
 /* ==================== VIEWPORT ==================== */
 
 using Viewport = SDL_RendererLogicalPresentation;
