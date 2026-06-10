@@ -184,6 +184,26 @@ inline bool Omni::RenderPoint(float x, float y)
     return SDL_RenderPoint(internal::renderer, x - internal::camera.x, y - internal::camera.y);
 }
 
+inline bool Omni::RenderPoints(const SDL_FPoint *points, int count)
+{
+    if (points && count > 0 && (internal::camera.x != 0 || internal::camera.y != 0)) {
+        float x = internal::camera.x;
+        float y = internal::camera.y;
+
+        SDL_FPoint fpoint;
+        for (int i = 0; i < count; i++) {
+            const SDL_FPoint &point = points[i];
+            fpoint.x = point.x - x;
+            fpoint.y = point.y - y;
+
+            if (!SDL_RenderPoints(internal::renderer, &fpoint, 1))
+                return false;
+        }
+        return true;
+    }
+    return SDL_RenderPoints(internal::renderer, points, count);
+}
+
 /* ========== INPUTS ========== */
 
 inline bool Omni::IsKeyPressed(SDL_Scancode key)

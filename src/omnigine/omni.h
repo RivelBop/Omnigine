@@ -44,6 +44,7 @@ void RenderToCamera(const Camera *camera);
 /** Renders a point through the camera to the renderer. */
 bool RenderPoint(float x, float y);
 
+/** Renders points through the camera to the renderer. */
 bool RenderPoints(const SDL_FPoint *points, int count);
 
 bool RenderLine(float x1, float y1, float x2, float y2);
