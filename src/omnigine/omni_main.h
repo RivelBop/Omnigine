@@ -241,6 +241,13 @@ inline bool Omni::RenderLines(const SDL_FPoint *points, int count)
     return SDL_RenderLines(internal::renderer, points, count);
 }
 
+inline bool Omni::RenderRect(SDL_FRect rect)
+{
+    rect.x -= internal::camera.x;
+    rect.y -= internal::camera.y;
+    return SDL_RenderRect(internal::renderer, &rect);
+}
+
 /* ========== INPUTS ========== */
 
 inline bool Omni::IsKeyPressed(SDL_Scancode key)

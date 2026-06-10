@@ -77,7 +77,8 @@ bool RenderLine(float x1, float y1, float x2, float y2);
 /** Renders lines through the camera to the renderer. */
 bool RenderLines(const SDL_FPoint *points, int count);
 
-bool RenderRect(const SDL_FRect &rect);
+/** Renders a rectangle through the camera to the renderer. */
+bool RenderRect(SDL_FRect rect);
 
 bool RenderRects(const SDL_FRect *rects, int count);
 
