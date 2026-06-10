@@ -186,6 +186,7 @@ inline bool Omni::RenderPoint(float x, float y)
 
 inline bool Omni::RenderPoints(const SDL_FPoint *points, int count)
 {
+    // Ensure points are available and the camera is set to a non-default position
     if (points && count > 0 && (internal::camera.x != 0 || internal::camera.y != 0)) {
         float x = internal::camera.x;
         float y = internal::camera.y;
@@ -196,11 +197,14 @@ inline bool Omni::RenderPoints(const SDL_FPoint *points, int count)
             fpoint.x = point.x - x;
             fpoint.y = point.y - y;
 
+            // This is what SDL_RenderPoint() performs under the hood
             if (!SDL_RenderPoints(internal::renderer, &fpoint, 1))
                 return false;
         }
         return true;
     }
+
+    // Handles errors if no points provided and rendering with default camera position (0,0)
     return SDL_RenderPoints(internal::renderer, points, count);
 }
 
