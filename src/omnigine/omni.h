@@ -83,7 +83,8 @@ bool RenderRect(SDL_FRect rect);
 /** Renders rectangles through the camera to the renderer. */
 bool RenderRects(const SDL_FRect *rects, int count);
 
-bool RenderFillRect(const SDL_FRect &rect);
+/** Renders a filled rectangle through the camera to the renderer. */
+bool RenderFillRect(SDL_FRect rect);
 
 bool RenderFillRects(const SDL_FRect *rects, int count);
 
