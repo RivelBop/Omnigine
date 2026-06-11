@@ -248,6 +248,36 @@ inline bool Omni::RenderRect(SDL_FRect rect)
     return SDL_RenderRect(internal::renderer, &rect);
 }
 
+inline bool Omni::RenderRects(const SDL_FRect *rects, int count)
+{
+    // Ensure rects are available and the camera is set to a non-default position
+    if (rects && count > 0 && (internal::camera.x != 0 || internal::camera.y != 0)) {
+        // Camera data
+        float x = internal::camera.x;
+        float y = internal::camera.y;
+        SDL_FRect camRect;
+
+        // SDL_RenderRects() also iterates and calls SDL_RenderRect() for each rect.
+        // For efficiency, we do the same but reuse camRect to apply the camera position.
+        bool result = true;
+        for (int i = 0; i < count; i++) {
+            const SDL_FRect &rect = rects[i];
+            camRect.x = rect.x - x;
+            camRect.y = rect.y - y;
+            camRect.w = rect.w;
+            camRect.h = rect.h;
+
+            if (!SDL_RenderRect(internal::renderer, &camRect))
+                result = false;
+        }
+
+        return result;
+    }
+
+    // Handles errors if no rects provided and rendering with default camera position (0,0)
+    return SDL_RenderRects(internal::renderer, rects, count);
+}
+
 /* ========== INPUTS ========== */
 
 inline bool Omni::IsKeyPressed(SDL_Scancode key)
