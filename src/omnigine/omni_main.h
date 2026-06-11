@@ -306,6 +306,13 @@ inline bool Omni::RenderFillRects(const SDL_FRect *rects, int count)
     return SDL_RenderFillRects(internal::renderer, rects, count);
 }
 
+inline bool Omni::RenderTexture(SDL_Texture &texture, const SDL_FRect *srcrect, SDL_FRect dstrect)
+{
+    dstrect.x -= internal::camera.x;
+    dstrect.y -= internal::camera.y;
+    return SDL_RenderTexture(internal::renderer, &texture, srcrect, &dstrect);
+}
+
 /* ========== INPUTS ========== */
 
 inline bool Omni::IsKeyPressed(SDL_Scancode key)

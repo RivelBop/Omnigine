@@ -89,7 +89,8 @@ bool RenderFillRect(SDL_FRect rect);
 /** Renders filled rectangles through the camera to the renderer. */
 bool RenderFillRects(const SDL_FRect *rects, int count);
 
-bool RenderTexture(SDL_Texture &texture, const SDL_FRect &srcrect, const SDL_FRect &dstrect);
+/** Renders a texture through the camera to the renderer, pass nullptr for srcrect to use the entire texture. */
+bool RenderTexture(SDL_Texture &texture, const SDL_FRect *srcrect, SDL_FRect dstrect);
 
 bool RenderTextureRotated(SDL_Texture &texture, const SDL_FRect &srcrect, const SDL_FRect &dstrect, double angle, const SDL_FPoint &center, SDL_FlipMode flip);
 
