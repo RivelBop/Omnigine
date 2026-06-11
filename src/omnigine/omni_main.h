@@ -6,16 +6,17 @@
 
 /* ==================== IMPORTS ==================== */
 
+#define MINIAUDIO_IMPLEMENTATION
+#include <miniaudio.h>
+
 /** Use callbacks instead of main(). */
 #define SDL_MAIN_USE_CALLBACKS 1
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
 
-#define MINIAUDIO_IMPLEMENTATION
-#include <miniaudio.h>
+#include <vector>
 
 #include "omni.h"
-
 #ifdef OMNI_SCENE
 #include "omni_scene.h"
 #endif
@@ -144,6 +145,7 @@ Uint32 fps = 0;
 /* ========== Misc. ========== */
 
 Omni::Camera camera;
+std::vector<SDL_FPoint> pointBuffer;
 } // namespace internal
 } // namespace
 
@@ -191,17 +193,13 @@ inline bool Omni::RenderPoints(const SDL_FPoint *points, int count)
         float x = internal::camera.x;
         float y = internal::camera.y;
 
-        SDL_FPoint fpoint;
-        for (int i = 0; i < count; i++) {
-            const SDL_FPoint &point = points[i];
-            fpoint.x = point.x - x;
-            fpoint.y = point.y - y;
+        internal::pointBuffer.clear();        // Clear previous data, but keep the allocated heap capacity
+        internal::pointBuffer.reserve(count); // Ensure enough capacity
 
-            // This is what SDL_RenderPoint() performs under the hood
-            if (!SDL_RenderPoints(internal::renderer, &fpoint, 1))
-                return false;
-        }
-        return true;
+        for (int i = 0; i < count; i++)
+            internal::pointBuffer.push_back({ points[i].x - x, points[i].y - y });
+
+        return SDL_RenderPoints(internal::renderer, internal::pointBuffer.data(), count);
     }
 
     // Handles errors if no points provided and rendering with default camera position (0,0)
@@ -222,20 +220,16 @@ inline bool Omni::RenderLines(const SDL_FPoint *points, int count)
         float x = internal::camera.x;
         float y = internal::camera.y;
 
+        internal::pointBuffer.clear();        // Clear previous data, but keep the allocated heap capacity
+        internal::pointBuffer.reserve(count); // Ensure enough capacity
+
         // Create a camera-projected variant of each point
         // This should be efficient as drawing each line with SDL_RenderLine() calls SDL_RenderLines() anyway
-        SDL_FPoint *camPoints = new SDL_FPoint[count];
-        for (int i = 0; i < count; i++) {
-            const SDL_FPoint &point = points[i];
-            SDL_FPoint &camPoint = camPoints[i];
-            camPoint.x = point.x - x;
-            camPoint.y = point.y - y;
-        }
+        for (int i = 0; i < count; i++)
+            internal::pointBuffer.push_back({ points[i].x - x, points[i].y - y });
 
         // Render the camera-projected lines
-        bool result = SDL_RenderLines(internal::renderer, camPoints, count);
-        delete[] camPoints;
-        return result;
+        return SDL_RenderLines(internal::renderer, internal::pointBuffer.data(), count);
     }
 
     // Handles errors if not enough points provided and rendering with default camera position (0,0)
