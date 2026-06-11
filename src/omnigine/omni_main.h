@@ -223,6 +223,7 @@ inline bool Omni::RenderLines(const SDL_FPoint *points, int count)
         float y = internal::camera.y;
 
         // Create a camera-projected variant of each point
+        // This should be efficient as drawing each line with SDL_RenderLine() calls SDL_RenderLines() anyway
         SDL_FPoint *camPoints = new SDL_FPoint[count];
         for (int i = 0; i < count; i++) {
             const SDL_FPoint &point = points[i];
@@ -259,7 +260,6 @@ inline bool Omni::RenderRects(const SDL_FRect *rects, int count)
 
         // SDL_RenderRects() also iterates and calls SDL_RenderRect() for each rect.
         // For efficiency, we do the same but reuse camRect to apply the camera position.
-        bool result = true;
         for (int i = 0; i < count; i++) {
             const SDL_FRect &rect = rects[i];
             camRect.x = rect.x - x;
@@ -268,10 +268,10 @@ inline bool Omni::RenderRects(const SDL_FRect *rects, int count)
             camRect.h = rect.h;
 
             if (!SDL_RenderRect(internal::renderer, &camRect))
-                result = false;
+                return false;
         }
 
-        return result;
+        return true;
     }
 
     // Handles errors if no rects provided and rendering with default camera position (0,0)
