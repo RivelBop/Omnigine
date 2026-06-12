@@ -31,27 +31,27 @@ struct WindowProperties
     /* ========== METADATA ========== */
 
     /** App name in metadata, can be null. */
-    const char *appName = nullptr;
+    const char *appName{ nullptr };
     /** App version in metadata, can be null. */
-    const char *appVersion = nullptr;
+    const char *appVersion{ nullptr };
     /** App ID in metadata, can be null. */
-    const char *appIdentifier = nullptr;
+    const char *appIdentifier{ nullptr };
 
     /* ========== INIT FLAGS ========== */
 
     /** The flags to pass into SDL_Init(), (VIDEO | GAMEPAD) are enabled automatically. */
-    SDL_InitFlags initFlags = 0;
+    SDL_InitFlags initFlags{ 0 };
 
     /* ========== WINDOW ========== */
 
     /** The window title, can be null. */
-    const char *title = nullptr;
+    const char *title{ nullptr };
     /** The window width. */
-    int width = 640;
+    int width{ 640 };
     /** The window height. */
-    int height = 480;
+    int height{ 480 };
     /** The window flags to pass into SDL_CreateWindowAndRenderer(), no flags by default. */
-    SDL_WindowFlags windowFlags = 0;
+    SDL_WindowFlags windowFlags{ 0 };
 
     /* ========== COPYING & MOVING ========== */
 
