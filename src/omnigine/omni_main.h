@@ -188,7 +188,9 @@ inline void Omni::RenderToCamera(const Omni::Camera *camera)
 
 inline bool Omni::RenderPoint(float x, float y)
 {
-    return SDL_RenderPoint(internal::renderer, x - internal::camera.x, y - internal::camera.y);
+    // This is how SDL_RenderPoint() is implemented
+    SDL_FPoint fpoint{ x - internal::camera.x, y - internal::camera.y };
+    return SDL_RenderPoints(internal::renderer, &fpoint, 1);
 }
 
 inline bool Omni::RenderPoints(const SDL_FPoint *points, int count)
