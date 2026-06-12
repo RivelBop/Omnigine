@@ -95,7 +95,8 @@ bool RenderTexture(SDL_Texture &texture, const SDL_FRect *srcrect, SDL_FRect dst
 /** Renders a rotated texture (in clockwise degrees) through the camera to the renderer, pass nullptr for srcrect to use the entire texture, pass nullptr for center to use half dstrect's size. */
 bool RenderTextureRotated(SDL_Texture &texture, const SDL_FRect *srcrect, SDL_FRect dstrect, double angle, const SDL_FPoint *center, SDL_FlipMode flip);
 
-bool RenderTextureAffine(SDL_Texture &texture, const SDL_FRect &srcrect, const SDL_FPoint &origin, const SDL_FPoint &right, const SDL_FPoint &down);
+/** Renders an affine texture (for perspective) through the camera to the renderer, pass nullptr for srcrect to use the entire texture. */
+bool RenderTextureAffine(SDL_Texture &texture, const SDL_FRect *srcrect, SDL_FPoint origin, SDL_FPoint right, SDL_FPoint down);
 
 bool RenderTextureTiled(SDL_Texture &texture, const SDL_FRect &srcrect, float scale, const SDL_FRect &dstrect);
 

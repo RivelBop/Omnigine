@@ -320,6 +320,21 @@ inline bool Omni::RenderTextureRotated(SDL_Texture &texture, const SDL_FRect *sr
     return SDL_RenderTextureRotated(internal::renderer, &texture, srcrect, &dstrect, angle, center, flip);
 }
 
+inline bool Omni::RenderTextureAffine(SDL_Texture &texture, const SDL_FRect *srcrect, SDL_FPoint origin, SDL_FPoint right, SDL_FPoint down)
+{
+    // Shift the local copies by the camera position
+    origin.x -= internal::camera.x;
+    origin.y -= internal::camera.y;
+
+    right.x -= internal::camera.x;
+    right.y -= internal::camera.y;
+
+    down.x -= internal::camera.x;
+    down.y -= internal::camera.y;
+
+    return SDL_RenderTextureAffine(internal::renderer, &texture, srcrect, &origin, &right, &down);
+}
+
 /* ========== INPUTS ========== */
 
 inline bool Omni::IsKeyPressed(SDL_Scancode key)
