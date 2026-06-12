@@ -38,11 +38,11 @@ inline bool SetRenderColor(float r, float g, float b, float a)
 /* ==================== VIEWPORT ==================== */
 
 using Viewport = SDL_RendererLogicalPresentation;
-inline constexpr Viewport SCREEN_VIEWPORT = SDL_LOGICAL_PRESENTATION_DISABLED;
-inline constexpr Viewport STRETCH_VIEWPORT = SDL_LOGICAL_PRESENTATION_STRETCH;
-inline constexpr Viewport FIT_VIEWPORT = SDL_LOGICAL_PRESENTATION_LETTERBOX;
-inline constexpr Viewport FILL_VIEWPORT = SDL_LOGICAL_PRESENTATION_OVERSCAN;
-inline constexpr Viewport PIXEL_PERFECT_VIEWPORT = SDL_LOGICAL_PRESENTATION_INTEGER_SCALE;
+inline constexpr Viewport SCREEN_VIEWPORT{ SDL_LOGICAL_PRESENTATION_DISABLED };
+inline constexpr Viewport STRETCH_VIEWPORT{ SDL_LOGICAL_PRESENTATION_STRETCH };
+inline constexpr Viewport FIT_VIEWPORT{ SDL_LOGICAL_PRESENTATION_LETTERBOX };
+inline constexpr Viewport FILL_VIEWPORT{ SDL_LOGICAL_PRESENTATION_OVERSCAN };
+inline constexpr Viewport PIXEL_PERFECT_VIEWPORT{ SDL_LOGICAL_PRESENTATION_INTEGER_SCALE };
 
 /** Calls SDL_SetRenderLogicalPresentation() for the global Renderer(). */
 inline bool SetViewport(const int width, const int height, const Viewport viewport)
@@ -54,9 +54,9 @@ inline bool SetViewport(const int width, const int height, const Viewport viewpo
 
 struct Camera
 {
-    float x = 0.0f;
-    float y = 0.0f;
-    float zoom = 1.0f;
+    float x{ 0.0f };
+    float y{ 0.0f };
+    float zoom{ 1.0f };
 };
 
 /**
