@@ -149,6 +149,8 @@ Omni::Camera camera;
 std::vector<SDL_FPoint> pointBuffer;
 /** Efficient heap allocation when calling rect-related camera-based rendering. */
 std::vector<SDL_FRect> rectBuffer;
+/** Efficient heap allocation when calling geometry or vertex related camera-based rendering. */
+std::vector<SDL_Vertex> vertexBuffer;
 } // namespace internal
 } // namespace
 
@@ -354,6 +356,33 @@ inline bool Omni::RenderTexture9GridTiled(SDL_Texture &texture, const SDL_FRect 
     dstrect.x -= internal::camera.x;
     dstrect.y -= internal::camera.y;
     return SDL_RenderTexture9GridTiled(internal::renderer, &texture, srcrect, leftWidth, rightWidth, topHeight, bottomHeight, scale, &dstrect, tileScale);
+}
+
+inline bool Omni::RenderGeometry(SDL_Texture *texture, const SDL_Vertex *vertices, int numVertices, const int *indices, int numIndices)
+{
+    // Ensure vertices provided and the camera is set to a non-default position
+    if (vertices && numVertices > 0 && (internal::camera.x != 0.0f || internal::camera.y != 0.0f)) {
+        // Camera data
+        float x = internal::camera.x;
+        float y = internal::camera.y;
+
+        // Ensure enough buffer capacity and set the necessary size
+        internal::vertexBuffer.resize(numVertices);
+
+        // Create a camera-projected variant of each vertex
+        for (int i = 0; i < numVertices; i++) {
+            SDL_Vertex vertex = vertices[i];
+            vertex.position.x -= x;
+            vertex.position.y -= y;
+            internal::vertexBuffer[i] = vertex;
+        }
+
+        // Render the camera-projected vertices
+        return SDL_RenderGeometry(internal::renderer, texture, internal::vertexBuffer.data(), numVertices, indices, numIndices);
+    }
+
+    // Handles errors if no vertices and rendering with default camera position (0,0)
+    return SDL_RenderGeometry(internal::renderer, texture, vertices, numVertices, indices, numIndices);
 }
 
 /* ========== INPUTS ========== */

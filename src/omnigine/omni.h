@@ -107,7 +107,8 @@ bool RenderTexture9Grid(SDL_Texture &texture, const SDL_FRect *srcrect, float le
 /** Renders a texture using 9-slice scaling as a tile to fill dstrect (ideal for UI relying on repeating textures) through the camera to the renderer, pass nullptr for srcrect to use the entire texture. */
 bool RenderTexture9GridTiled(SDL_Texture &texture, const SDL_FRect *srcrect, float leftWidth, float rightWidth, float topHeight, float bottomHeight, float scale, SDL_FRect dstrect, float tileScale);
 
-bool RenderGeometry(SDL_Texture &texture, const SDL_Vertex *vertices, int num_vertices, const int *indices, int num_indices);
+/** Renders any geometric shape using a (optional) texture, vertices, and (optional) indices through the camera to the renderer. */
+bool RenderGeometry(SDL_Texture *texture, const SDL_Vertex *vertices, int numVertices, const int *indices, int numIndices);
 
 bool RenderGeometryRaw(SDL_Texture &texture, const float *xy, int xy_stride, const SDL_FColor *color, int color_stride, const float *uv, int uv_stride, int num_vertices, const void *indices, int num_indices, int size_indices);
 
