@@ -194,16 +194,20 @@ inline bool Omni::RenderPoint(float x, float y)
 inline bool Omni::RenderPoints(const SDL_FPoint *points, int count)
 {
     // Ensure points are available and the camera is set to a non-default position
-    if (points && count > 0 && (internal::camera.x != 0 || internal::camera.y != 0)) {
+    if (points && count > 0 && (internal::camera.x != 0.0f || internal::camera.y != 0.0f)) {
+        // Camera data
         float x = internal::camera.x;
         float y = internal::camera.y;
 
-        internal::pointBuffer.clear();        // Clear previous data, but keep the allocated heap capacity
-        internal::pointBuffer.reserve(count); // Ensure enough capacity
+        // Ensure enough buffer capacity and set the necessary size
+        internal::pointBuffer.resize(count);
 
+        // Create a camera-projected variant of each point
+        // This should be efficient as drawing each point with SDL_RenderPoint() calls SDL_RenderPoints() anyway
         for (int i = 0; i < count; i++)
-            internal::pointBuffer.push_back({ points[i].x - x, points[i].y - y });
+            internal::pointBuffer[i] = { points[i].x - x, points[i].y - y };
 
+        // Render the camera-projected points
         return SDL_RenderPoints(internal::renderer, internal::pointBuffer.data(), count);
     }
 
@@ -221,17 +225,18 @@ inline bool Omni::RenderLine(float x1, float y1, float x2, float y2)
 inline bool Omni::RenderLines(const SDL_FPoint *points, int count)
 {
     // Ensure points are available and the camera is set to a non-default position
-    if (points && count > 1 && (internal::camera.x != 0 || internal::camera.y != 0)) {
+    if (points && count > 1 && (internal::camera.x != 0.0f || internal::camera.y != 0.0f)) {
+        // Camera data
         float x = internal::camera.x;
         float y = internal::camera.y;
 
-        internal::pointBuffer.clear();        // Clear previous data, but keep the allocated heap capacity
-        internal::pointBuffer.reserve(count); // Ensure enough capacity
+        // Ensure enough buffer capacity and set the necessary size
+        internal::pointBuffer.resize(count);
 
         // Create a camera-projected variant of each point
         // This should be efficient as drawing each line with SDL_RenderLine() calls SDL_RenderLines() anyway
         for (int i = 0; i < count; i++)
-            internal::pointBuffer.push_back({ points[i].x - x, points[i].y - y });
+            internal::pointBuffer[i] = { points[i].x - x, points[i].y - y };
 
         // Render the camera-projected lines
         return SDL_RenderLines(internal::renderer, internal::pointBuffer.data(), count);
@@ -251,7 +256,7 @@ inline bool Omni::RenderRect(SDL_FRect rect)
 inline bool Omni::RenderRects(const SDL_FRect *rects, int count)
 {
     // Ensure rects are available and the camera is set to a non-default position
-    if (rects && count > 0 && (internal::camera.x != 0 || internal::camera.y != 0)) {
+    if (rects && count > 0 && (internal::camera.x != 0.0f || internal::camera.y != 0.0f)) {
         // Camera data
         float x = internal::camera.x;
         float y = internal::camera.y;
