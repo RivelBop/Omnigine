@@ -342,6 +342,13 @@ inline bool Omni::RenderTextureTiled(SDL_Texture &texture, const SDL_FRect *srcr
     return SDL_RenderTextureTiled(internal::renderer, &texture, srcrect, scale, &dstrect);
 }
 
+inline bool Omni::RenderTexture9Grid(SDL_Texture &texture, const SDL_FRect *srcrect, float leftWidth, float rightWidth, float topHeight, float bottomHeight, float scale, SDL_FRect dstrect)
+{
+    dstrect.x -= internal::camera.x;
+    dstrect.y -= internal::camera.y;
+    return SDL_RenderTexture9Grid(internal::renderer, &texture, srcrect, leftWidth, rightWidth, topHeight, bottomHeight, scale, &dstrect);
+}
+
 /* ========== INPUTS ========== */
 
 inline bool Omni::IsKeyPressed(SDL_Scancode key)
