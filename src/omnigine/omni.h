@@ -98,7 +98,8 @@ bool RenderTextureRotated(SDL_Texture &texture, const SDL_FRect *srcrect, SDL_FR
 /** Renders an affine texture (for perspective) through the camera to the renderer, pass nullptr for srcrect to use the entire texture. */
 bool RenderTextureAffine(SDL_Texture &texture, const SDL_FRect *srcrect, SDL_FPoint origin, SDL_FPoint right, SDL_FPoint down);
 
-bool RenderTextureTiled(SDL_Texture &texture, const SDL_FRect &srcrect, float scale, const SDL_FRect &dstrect);
+/** Renders a texture as a tile to fill dstrect through the camera to the renderer, pass nullptr for srcrect to use the entire texture. */
+bool RenderTextureTiled(SDL_Texture &texture, const SDL_FRect *srcrect, float scale, SDL_FRect dstrect);
 
 bool RenderTexture9Grid(SDL_Texture &texture, const SDL_FRect &srcrect, float left_width, float right_width, float top_height, float bottom_height, float scale, const SDL_FRect &dstrect);
 

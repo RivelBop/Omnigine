@@ -335,6 +335,13 @@ inline bool Omni::RenderTextureAffine(SDL_Texture &texture, const SDL_FRect *src
     return SDL_RenderTextureAffine(internal::renderer, &texture, srcrect, &origin, &right, &down);
 }
 
+inline bool Omni::RenderTextureTiled(SDL_Texture &texture, const SDL_FRect *srcrect, float scale, SDL_FRect dstrect)
+{
+    dstrect.x -= internal::camera.x;
+    dstrect.y -= internal::camera.y;
+    return SDL_RenderTextureTiled(internal::renderer, &texture, srcrect, scale, &dstrect);
+}
+
 /* ========== INPUTS ========== */
 
 inline bool Omni::IsKeyPressed(SDL_Scancode key)
