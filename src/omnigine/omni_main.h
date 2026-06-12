@@ -287,18 +287,18 @@ inline bool Omni::RenderFillRect(SDL_FRect rect)
 inline bool Omni::RenderFillRects(const SDL_FRect *rects, int count)
 {
     // Ensure rects are available and the camera is set to a non-default position
-    if (rects && count > 0 && (internal::camera.x != 0 || internal::camera.y != 0)) {
+    if (rects && count > 0 && (internal::camera.x != 0.0f || internal::camera.y != 0.0f)) {
         // Camera data
         float x = internal::camera.x;
         float y = internal::camera.y;
 
-        internal::rectBuffer.clear();        // Clear previous data, but keep the allocated heap capacity
-        internal::rectBuffer.reserve(count); // Ensure enough capacity
+        // Ensure enough buffer capacity and set the necessary size
+        internal::rectBuffer.resize(count);
 
         // Create a camera-projected variant of each rect
         // This should be efficient as drawing each rect with SDL_RenderFillRect() calls SDL_RenderFillRects() anyway
         for (int i = 0; i < count; i++)
-            internal::rectBuffer.push_back({ rects[i].x - x, rects[i].y - y, rects[i].w, rects[i].h });
+            internal::rectBuffer[i] = { rects[i].x - x, rects[i].y - y, rects[i].w, rects[i].h };
 
         // Render the camera-projected rects
         return SDL_RenderFillRects(internal::renderer, internal::rectBuffer.data(), count);
