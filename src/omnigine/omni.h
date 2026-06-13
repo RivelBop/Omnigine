@@ -113,6 +113,7 @@ bool RenderGeometry(SDL_Texture *texture, const SDL_Vertex *vertices, int numVer
 /** Renders any geometric shape using a (optional) texture, raw vertice data, and (optional) indices through the camera to the renderer. */
 bool RenderGeometryRaw(SDL_Texture *texture, const float *xy, int xyStride, const SDL_FColor *color, int colorStride, const float *uv, int uvStride, int numVertices, const void *indices, int numIndices, int sizeIndices);
 
+/** Renders debug text through the camera to the renderer. */
 bool RenderDebugText(float x, float y, const char *str);
 
 bool RenderDebugTextFormat(float x, float y, const char *fmt, ...);

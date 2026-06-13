@@ -426,6 +426,11 @@ inline bool Omni::RenderGeometryRaw(SDL_Texture *texture, const float *xy, int x
     return SDL_RenderGeometryRaw(internal::renderer, texture, xy, xyStride, color, colorStride, uv, uvStride, numVertices, indices, numIndices, sizeIndices);
 }
 
+inline bool Omni::RenderDebugText(float x, float y, const char *str)
+{
+    return SDL_RenderDebugText(internal::renderer, x - internal::camera.x, y - internal::camera.y, str);
+}
+
 /* ========== INPUTS ========== */
 
 inline bool Omni::IsKeyPressed(SDL_Scancode key)
