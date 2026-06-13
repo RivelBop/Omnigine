@@ -112,35 +112,35 @@ namespace internal
 /** Prevents the user from altering and potentially breaking the app's state; static in SDL_AppInit. */
 struct AppState
 {
-    SDL_Window *window = nullptr;
-    SDL_Renderer *renderer = nullptr;
-    ma_engine *soundEngine = nullptr;
+    SDL_Window *window{ nullptr };
+    SDL_Renderer *renderer{ nullptr };
+    ma_engine *soundEngine{ nullptr };
 
-    bool quit = false;
-    bool keysPressed[SDL_SCANCODE_COUNT] = {};
-    bool keysJustPressed[SDL_SCANCODE_COUNT] = {};
-    bool keyPressed = false;
+    bool quit{ false };
+    bool keysPressed[SDL_SCANCODE_COUNT]{};
+    bool keysJustPressed[SDL_SCANCODE_COUNT]{};
+    bool keyPressed{ false };
 
 #ifdef OMNI_SCENE
-    Omni::Scene *currentScene = nullptr;
-    Omni::Scene *nextScene = nullptr;
+    Omni::Scene *currentScene{ nullptr };
+    Omni::Scene *nextScene{ nullptr };
 #endif
 };
 
 /* ========== SDL_AppInit ========== */
 
-SDL_Window *window = nullptr;
-SDL_Renderer *renderer = nullptr;
+SDL_Window *window{ nullptr };
+SDL_Renderer *renderer{ nullptr };
 
 /* ========== SDL_AppEvent ========== */
 
-const bool *keysPressed = nullptr;
-const bool *keysJustPressed = nullptr;
+const bool *keysPressed{ nullptr };
+const bool *keysJustPressed{ nullptr };
 
 /* ========== SDL_AppIterate ========== */
 
-float deltaTime = 0.0f;
-Uint32 fps = 0;
+float deltaTime{ 0.0f };
+Uint32 fps{ 0 };
 
 /* ========== Misc. ========== */
 
