@@ -116,6 +116,7 @@ bool RenderGeometryRaw(SDL_Texture *texture, const float *xy, int xyStride, cons
 /** Renders debug text through the camera to the renderer. */
 bool RenderDebugText(float x, float y, const char *str);
 
+/** Renders debug text with C-style formatting through the camera to the renderer. */
 bool RenderDebugTextFormat(float x, float y, const char *fmt, ...);
 
 /* ==================== INPUTS ==================== */

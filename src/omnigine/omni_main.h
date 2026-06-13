@@ -431,6 +431,33 @@ inline bool Omni::RenderDebugText(float x, float y, const char *str)
     return SDL_RenderDebugText(internal::renderer, x - internal::camera.x, y - internal::camera.y, str);
 }
 
+inline bool Omni::RenderDebugTextFormat(float x, float y, const char *fmt, ...)
+{
+    // The following is taken straight from SDL_RenderDebugTextFormat()
+    va_list ap;
+    va_start(ap, fmt);
+
+    x -= internal::camera.x;
+    y -= internal::camera.y;
+
+    if (SDL_strcmp(fmt, "%s") == 0) {
+        const char *str{ va_arg(ap, const char *) };
+        va_end(ap);
+        return SDL_RenderDebugText(internal::renderer, x, y, str);
+    }
+
+    char *str{ nullptr };
+    const int rc{ SDL_vasprintf(&str, fmt, ap) };
+    va_end(ap);
+
+    if (rc == -1)
+        return false;
+
+    const bool retval{ SDL_RenderDebugText(internal::renderer, x, y, str) };
+    SDL_free(str);
+    return retval;
+}
+
 /* ========== INPUTS ========== */
 
 inline bool Omni::IsKeyPressed(SDL_Scancode key)
