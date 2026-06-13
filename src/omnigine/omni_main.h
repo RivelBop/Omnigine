@@ -198,15 +198,15 @@ inline bool Omni::RenderPoints(const SDL_FPoint *points, int count)
     // Ensure points are available and the camera is set to a non-default position
     if (points && count > 0 && (internal::camera.x != 0.0f || internal::camera.y != 0.0f)) {
         // Camera data
-        float x = internal::camera.x;
-        float y = internal::camera.y;
+        float x{ internal::camera.x };
+        float y{ internal::camera.y };
 
         // Ensure enough buffer capacity and set the necessary size
         internal::pointBuffer.resize(count);
 
         // Create a camera-projected variant of each point
         // This should be efficient as drawing each point with SDL_RenderPoint() calls SDL_RenderPoints() anyway
-        for (int i = 0; i < count; i++)
+        for (int i{ 0 }; i < count; i++)
             internal::pointBuffer[i] = { points[i].x - x, points[i].y - y };
 
         // Render the camera-projected points
@@ -219,8 +219,8 @@ inline bool Omni::RenderPoints(const SDL_FPoint *points, int count)
 
 inline bool Omni::RenderLine(float x1, float y1, float x2, float y2)
 {
-    float x = internal::camera.x;
-    float y = internal::camera.y;
+    float x{ internal::camera.x };
+    float y{ internal::camera.y };
     return SDL_RenderLine(internal::renderer, x1 - x, y1 - y, x2 - x, y2 - y);
 }
 
@@ -229,15 +229,15 @@ inline bool Omni::RenderLines(const SDL_FPoint *points, int count)
     // Ensure points are available and the camera is set to a non-default position
     if (points && count > 1 && (internal::camera.x != 0.0f || internal::camera.y != 0.0f)) {
         // Camera data
-        float x = internal::camera.x;
-        float y = internal::camera.y;
+        float x{ internal::camera.x };
+        float y{ internal::camera.y };
 
         // Ensure enough buffer capacity and set the necessary size
         internal::pointBuffer.resize(count);
 
         // Create a camera-projected variant of each point
         // This should be efficient as drawing each line with SDL_RenderLine() calls SDL_RenderLines() anyway
-        for (int i = 0; i < count; i++)
+        for (int i{ 0 }; i < count; i++)
             internal::pointBuffer[i] = { points[i].x - x, points[i].y - y };
 
         // Render the camera-projected lines
@@ -260,13 +260,13 @@ inline bool Omni::RenderRects(const SDL_FRect *rects, int count)
     // Ensure rects are available and the camera is set to a non-default position
     if (rects && count > 0 && (internal::camera.x != 0.0f || internal::camera.y != 0.0f)) {
         // Camera data
-        float x = internal::camera.x;
-        float y = internal::camera.y;
+        float x{ internal::camera.x };
+        float y{ internal::camera.y };
         SDL_FRect camRect;
 
         // SDL_RenderRects() also iterates and calls SDL_RenderRect() for each rect.
         // For efficiency, we do the same but reuse camRect to apply the camera position.
-        for (int i = 0; i < count; i++) {
+        for (int i{ 0 }; i < count; i++) {
             const SDL_FRect &rect = rects[i];
             camRect.x = rect.x - x;
             camRect.y = rect.y - y;
@@ -296,15 +296,15 @@ inline bool Omni::RenderFillRects(const SDL_FRect *rects, int count)
     // Ensure rects are available and the camera is set to a non-default position
     if (rects && count > 0 && (internal::camera.x != 0.0f || internal::camera.y != 0.0f)) {
         // Camera data
-        float x = internal::camera.x;
-        float y = internal::camera.y;
+        float x{ internal::camera.x };
+        float y{ internal::camera.y };
 
         // Ensure enough buffer capacity and set the necessary size
         internal::rectBuffer.resize(count);
 
         // Create a camera-projected variant of each rect
         // This should be efficient as drawing each rect with SDL_RenderFillRect() calls SDL_RenderFillRects() anyway
-        for (int i = 0; i < count; i++)
+        for (int i{ 0 }; i < count; i++)
             internal::rectBuffer[i] = { rects[i].x - x, rects[i].y - y, rects[i].w, rects[i].h };
 
         // Render the camera-projected rects
@@ -370,15 +370,15 @@ inline bool Omni::RenderGeometry(SDL_Texture *texture, const SDL_Vertex *vertice
     // Ensure vertices provided and the camera is set to a non-default position
     if (vertices && numVertices > 0 && (internal::camera.x != 0.0f || internal::camera.y != 0.0f)) {
         // Camera data
-        float x = internal::camera.x;
-        float y = internal::camera.y;
+        float x{ internal::camera.x };
+        float y{ internal::camera.y };
 
         // Ensure enough buffer capacity and set the necessary size
         internal::vertexBuffer.resize(numVertices);
 
         // Create a camera-projected variant of each vertex
-        for (int i = 0; i < numVertices; i++) {
-            SDL_Vertex vertex = vertices[i];
+        for (int i{ 0 }; i < numVertices; i++) {
+            SDL_Vertex vertex{ vertices[i] };
             vertex.position.x -= x;
             vertex.position.y -= y;
             internal::vertexBuffer[i] = vertex;
@@ -436,7 +436,7 @@ inline SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
     *appstate = &appState;
 
     // Get the user's window configuration
-    const WindowProperties properties = InitWindow(argc, argv);
+    const WindowProperties properties{ InitWindow(argc, argv) };
 
     // Set the app metadata using the user's properties
     SDL_SetAppMetadata(properties.appName, properties.appVersion, properties.appIdentifier);
@@ -489,7 +489,7 @@ inline SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
 /* This function runs when a new event (mouse input, keypresses, etc.) occurs. */
 inline SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
 {
-    internal::AppState &appState = *(internal::AppState *)appstate;
+    internal::AppState &appState = *static_cast<internal::AppState *>(appstate);
 
     if (event->type == SDL_EVENT_QUIT) {
         appState.quit = true;
@@ -497,14 +497,14 @@ inline SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
     }
 
     if (event->type == SDL_EVENT_KEY_DOWN) {
-        SDL_Scancode key = event->key.scancode;
+        SDL_Scancode key{ event->key.scancode };
         if (!appState.keysPressed[key]) {
             appState.keysPressed[key] = true;
             appState.keysJustPressed[key] = true;
             appState.keyPressed = true;
         }
     } else if (event->type == SDL_EVENT_KEY_UP) {
-        SDL_Scancode key = event->key.scancode;
+        SDL_Scancode key{ event->key.scancode };
         appState.keysPressed[key] = false;
         appState.keysJustPressed[key] = false;
     }
@@ -515,10 +515,10 @@ inline SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
 /* This function runs once per frame, and is the heart of the program. */
 inline SDL_AppResult SDL_AppIterate(void *appstate)
 {
-    static Uint64 startDt = SDL_GetTicksNS();
-    static Uint64 startFps = startDt;
-    static Uint32 frames = 0;
-    const Uint64 end = SDL_GetTicksNS();
+    static Uint64 startDt{ SDL_GetTicksNS() };
+    static Uint64 startFps{ startDt };
+    static Uint32 frames{ 0 };
+    const Uint64 end{ SDL_GetTicksNS() };
 
     // Calculate delta time
     internal::deltaTime = (end - startDt) / 1e9f;
@@ -532,7 +532,7 @@ inline SDL_AppResult SDL_AppIterate(void *appstate)
     }
     frames += 1;
 
-    internal::AppState &appState = *(internal::AppState *)appstate;
+    internal::AppState &appState = *static_cast<internal::AppState *>(appstate);
 
     // Clear the window to black (automatic for the user)
     SDL_SetRenderDrawColor(appState.renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
@@ -570,9 +570,7 @@ inline SDL_AppResult SDL_AppIterate(void *appstate)
     SDL_RenderPresent(appState.renderer);
 
     if (appState.keyPressed) {
-        for (int i = 0; i < SDL_SCANCODE_COUNT; i++) {
-            appState.keysJustPressed[i] = false;
-        }
+        memset(appState.keysJustPressed, 0, SDL_SCANCODE_COUNT * sizeof(bool));
         appState.keyPressed = false;
     }
 
@@ -582,7 +580,7 @@ inline SDL_AppResult SDL_AppIterate(void *appstate)
 /* This function runs once at shutdown; SDL will clean up the window/renderer for us. */
 inline void SDL_AppQuit(void *appstate, SDL_AppResult result)
 {
-    internal::AppState &appState = *(internal::AppState *)appstate;
+    internal::AppState &appState = *static_cast<internal::AppState *>(appstate);
 #ifdef OMNI_SCENE
     // Dispose remaining scene (if available)
     Omni::Scene *&currentScene = appState.currentScene;
