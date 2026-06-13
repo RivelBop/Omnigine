@@ -151,6 +151,8 @@ std::vector<SDL_FPoint> pointBuffer;
 std::vector<SDL_FRect> rectBuffer;
 /** Efficient heap allocation when calling geometry or vertex related camera-based rendering. */
 std::vector<SDL_Vertex> vertexBuffer;
+/** Efficient heap allocation when calling raw geometry camera-based rendering. */
+std::vector<float> floatBuffer;
 } // namespace internal
 } // namespace
 
@@ -390,6 +392,38 @@ inline bool Omni::RenderGeometry(SDL_Texture *texture, const SDL_Vertex *vertice
 
     // Handles errors if no vertices and rendering with default camera position (0,0)
     return SDL_RenderGeometry(internal::renderer, texture, vertices, numVertices, indices, numIndices);
+}
+
+inline bool Omni::RenderGeometryRaw(SDL_Texture *texture, const float *xy, int xyStride, const SDL_FColor *color, int colorStride, const float *uv, int uvStride, int numVertices, const void *indices, int numIndices, int sizeIndices)
+{
+    // Perform some of the required checks SDL_RenderGeometryRaw() does and ensure the camera is at a non-default position
+    if (xy && color && (!texture || uv) && numVertices > 2 && (internal::camera.x != 0.0f || internal::camera.y != 0.0f)) {
+        // Camera data
+        float x{ internal::camera.x };
+        float y{ internal::camera.y };
+
+        // Ensure enough buffer capacity and set the necessary size
+        // xy is represented as 2 floats (x and y) side-by-side so 2x the # of vertices is necessary
+        internal::floatBuffer.resize(numVertices * 2);
+
+        // Create a camera-projected variant of each vertex
+        for (int i{ 0 }; i < numVertices; i++) {
+            // Represent xy pointer as char for byte-size pointer arithmetic (xyStride is in bytes)
+            // Start at the first xy, move up by the xyStride and the index
+            const float *pos{ reinterpret_cast<const float *>(reinterpret_cast<const char *>(xy) + xyStride * i) };
+
+            // The float buffer's index stores side-by-side floats representing x and y therefore i * 2 is x
+            int index{ i * 2 };
+            internal::floatBuffer[index] = pos[0] - x;
+            internal::floatBuffer[index + 1] = pos[1] - y;
+        }
+
+        // Render the camera-projected vertices
+        return SDL_RenderGeometryRaw(internal::renderer, texture, internal::floatBuffer.data(), sizeof(float) * 2, color, colorStride, uv, uvStride, numVertices, indices, numIndices, sizeIndices);
+    }
+
+    // Handles missing data, errors, and rendering with default camera position (0,0)
+    return SDL_RenderGeometryRaw(internal::renderer, texture, xy, xyStride, color, colorStride, uv, uvStride, numVertices, indices, numIndices, sizeIndices);
 }
 
 /* ========== INPUTS ========== */

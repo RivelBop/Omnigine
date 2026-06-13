@@ -110,7 +110,8 @@ bool RenderTexture9GridTiled(SDL_Texture &texture, const SDL_FRect *srcrect, flo
 /** Renders any geometric shape using a (optional) texture, vertices, and (optional) indices through the camera to the renderer. */
 bool RenderGeometry(SDL_Texture *texture, const SDL_Vertex *vertices, int numVertices, const int *indices, int numIndices);
 
-bool RenderGeometryRaw(SDL_Texture &texture, const float *xy, int xy_stride, const SDL_FColor *color, int color_stride, const float *uv, int uv_stride, int num_vertices, const void *indices, int num_indices, int size_indices);
+/** Renders any geometric shape using a (optional) texture, raw vertice data, and (optional) indices through the camera to the renderer. */
+bool RenderGeometryRaw(SDL_Texture *texture, const float *xy, int xyStride, const SDL_FColor *color, int colorStride, const float *uv, int uvStride, int numVertices, const void *indices, int numIndices, int sizeIndices);
 
 bool RenderDebugText(float x, float y, const char *str);
 
