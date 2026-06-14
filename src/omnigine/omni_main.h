@@ -317,21 +317,21 @@ inline bool Omni::RenderFillRects(const SDL_FRect *rects, int count)
     return SDL_RenderFillRects(internal::renderer, rects, count);
 }
 
-inline bool Omni::RenderTexture(SDL_Texture &texture, const SDL_FRect *srcrect, SDL_FRect dstrect)
+inline bool Omni::RenderTexture(SDL_Texture *texture, const SDL_FRect *srcrect, SDL_FRect dstrect)
 {
     dstrect.x -= internal::camera.x;
     dstrect.y -= internal::camera.y;
-    return SDL_RenderTexture(internal::renderer, &texture, srcrect, &dstrect);
+    return SDL_RenderTexture(internal::renderer, texture, srcrect, &dstrect);
 }
 
-inline bool Omni::RenderTextureRotated(SDL_Texture &texture, const SDL_FRect *srcrect, SDL_FRect dstrect, double angle, const SDL_FPoint *center, SDL_FlipMode flip)
+inline bool Omni::RenderTextureRotated(SDL_Texture *texture, const SDL_FRect *srcrect, SDL_FRect dstrect, double angle, const SDL_FPoint *center, SDL_FlipMode flip)
 {
     dstrect.x -= internal::camera.x;
     dstrect.y -= internal::camera.y;
-    return SDL_RenderTextureRotated(internal::renderer, &texture, srcrect, &dstrect, angle, center, flip);
+    return SDL_RenderTextureRotated(internal::renderer, texture, srcrect, &dstrect, angle, center, flip);
 }
 
-inline bool Omni::RenderTextureAffine(SDL_Texture &texture, const SDL_FRect *srcrect, SDL_FPoint origin, SDL_FPoint right, SDL_FPoint down)
+inline bool Omni::RenderTextureAffine(SDL_Texture *texture, const SDL_FRect *srcrect, SDL_FPoint origin, SDL_FPoint right, SDL_FPoint down)
 {
     // Shift the local copies by the camera position
     origin.x -= internal::camera.x;
@@ -343,28 +343,28 @@ inline bool Omni::RenderTextureAffine(SDL_Texture &texture, const SDL_FRect *src
     down.x -= internal::camera.x;
     down.y -= internal::camera.y;
 
-    return SDL_RenderTextureAffine(internal::renderer, &texture, srcrect, &origin, &right, &down);
+    return SDL_RenderTextureAffine(internal::renderer, texture, srcrect, &origin, &right, &down);
 }
 
-inline bool Omni::RenderTextureTiled(SDL_Texture &texture, const SDL_FRect *srcrect, float scale, SDL_FRect dstrect)
+inline bool Omni::RenderTextureTiled(SDL_Texture *texture, const SDL_FRect *srcrect, float scale, SDL_FRect dstrect)
 {
     dstrect.x -= internal::camera.x;
     dstrect.y -= internal::camera.y;
-    return SDL_RenderTextureTiled(internal::renderer, &texture, srcrect, scale, &dstrect);
+    return SDL_RenderTextureTiled(internal::renderer, texture, srcrect, scale, &dstrect);
 }
 
-inline bool Omni::RenderTexture9Grid(SDL_Texture &texture, const SDL_FRect *srcrect, float leftWidth, float rightWidth, float topHeight, float bottomHeight, float scale, SDL_FRect dstrect)
+inline bool Omni::RenderTexture9Grid(SDL_Texture *texture, const SDL_FRect *srcrect, float leftWidth, float rightWidth, float topHeight, float bottomHeight, float scale, SDL_FRect dstrect)
 {
     dstrect.x -= internal::camera.x;
     dstrect.y -= internal::camera.y;
-    return SDL_RenderTexture9Grid(internal::renderer, &texture, srcrect, leftWidth, rightWidth, topHeight, bottomHeight, scale, &dstrect);
+    return SDL_RenderTexture9Grid(internal::renderer, texture, srcrect, leftWidth, rightWidth, topHeight, bottomHeight, scale, &dstrect);
 }
 
-inline bool Omni::RenderTexture9GridTiled(SDL_Texture &texture, const SDL_FRect *srcrect, float leftWidth, float rightWidth, float topHeight, float bottomHeight, float scale, SDL_FRect dstrect, float tileScale)
+inline bool Omni::RenderTexture9GridTiled(SDL_Texture *texture, const SDL_FRect *srcrect, float leftWidth, float rightWidth, float topHeight, float bottomHeight, float scale, SDL_FRect dstrect, float tileScale)
 {
     dstrect.x -= internal::camera.x;
     dstrect.y -= internal::camera.y;
-    return SDL_RenderTexture9GridTiled(internal::renderer, &texture, srcrect, leftWidth, rightWidth, topHeight, bottomHeight, scale, &dstrect, tileScale);
+    return SDL_RenderTexture9GridTiled(internal::renderer, texture, srcrect, leftWidth, rightWidth, topHeight, bottomHeight, scale, &dstrect, tileScale);
 }
 
 inline bool Omni::RenderGeometry(SDL_Texture *texture, const SDL_Vertex *vertices, int numVertices, const int *indices, int numIndices)
