@@ -14,23 +14,6 @@ endif()
 # Generate compile_commands.json (useful for IDEs)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-# Raylib Dependencies (soon to be replaced by SDL3)
-set(RAYLIB_VERSION 6.0)
-find_package(raylib ${RAYLIB_VERSION} QUIET) # QUIET or REQUIRED
-if (NOT raylib_FOUND) # If there's none, fetch and build raylib
-  include(FetchContent)
-  FetchContent_Declare(
-    raylib
-    DOWNLOAD_EXTRACT_TIMESTAMP OFF
-    URL https://github.com/raysan5/raylib/archive/refs/tags/${RAYLIB_VERSION}.tar.gz
-  )
-  FetchContent_GetProperties(raylib)
-  if (NOT raylib_POPULATED) # Have we downloaded raylib yet?
-    set(FETCHCONTENT_QUIET NO)
-    FetchContent_MakeAvailable(raylib)
-  endif()
-endif()
-
 # SDL3 Dependencies
 set(SDL3_VERSION 3.4.10)
 find_package(SDL3 ${SDL3_VERSION} QUIET)
@@ -111,7 +94,7 @@ add_executable(${PROJECT_NAME} src/main.cpp
         src/omnigine/omni_assets.h
 )
 
-target_link_libraries(${PROJECT_NAME} PRIVATE raylib SDL3::SDL3 SDL3_image::SDL3_image SDL3_ttf::SDL3_ttf miniaudio)
+target_link_libraries(${PROJECT_NAME} PRIVATE SDL3::SDL3 SDL3_image::SDL3_image SDL3_ttf::SDL3_ttf miniaudio)
 
 # Web Configurations
 if (${PLATFORM} STREQUAL "Web")
