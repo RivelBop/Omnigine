@@ -1,11 +1,14 @@
 #pragma once
 
-#include <list>
+#include <SDL3_TTF/SDL_ttf.h>
+#include <SDL3_image/SDL_image.h>
+
+#include <memory>
 #include <queue>
 #include <string>
 #include <unordered_map>
 
-#include "raylib.h"
+#include "omni.h"
 
 namespace Omni
 {
@@ -14,9 +17,9 @@ class Assets
   public:
     /* ==================== LOADING ==================== */
 
-    void loadImage(const std::string &fileName)
+    void loadSurface(const std::string &fileName)
     {
-        load(fileName, IMAGE);
+        load(fileName, SURFACE);
     }
 
     void loadTexture(const std::string &fileName)
@@ -27,16 +30,6 @@ class Assets
     void loadFont(const std::string &fileName)
     {
         load(fileName, FONT);
-    }
-
-    void loadModel(const std::string &fileName)
-    {
-        load(fileName, MODEL);
-    }
-
-    void loadWave(const std::string &fileName)
-    {
-        load(fileName, WAVE);
     }
 
     void loadSound(const std::string &fileName)
@@ -51,12 +44,14 @@ class Assets
 
     /* ==================== INITIALIZING AND UPDATING ==================== */
 
-    // Get the first queued asset and initialize it.
-    // Returns true if all queued assets have been initialized.
+    /**
+     * Get the first queued asset and initialize it.
+     * Returns true if all queued assets have been initialized.
+     */
     bool update()
     {
         // Initial size check to ensure the assets aren't already done loading
-        size_t size = loadQueue.size();
+        size_t size{ loadQueue.size() };
         if (size == 0)
             return true;
 
@@ -65,23 +60,24 @@ class Assets
         const Type &t = typeMap.at(asset);
 
         // Get C String representation of asset file
-        const char *a = asset.c_str();
+        const char *a{ asset.c_str() };
 
         // Load each asset into their appropriate map
-        if (t == IMAGE)
-            imageMap.insert({ asset, LoadImage(a) });
+        if (t == SURFACE)
+            surfaceMap.emplace(asset, IMG_Load(a));
         else if (t == TEXTURE)
-            textureMap.insert({ asset, LoadTexture(a) });
+            textureMap.emplace(asset, IMG_LoadTexture(Omni::Renderer(), a));
         else if (t == FONT)
-            fontMap.insert({ asset, LoadFont(a) });
-        else if (t == MODEL)
-            modelMap.insert({ asset, LoadModel(a) });
-        else if (t == WAVE)
-            waveMap.insert({ asset, LoadWave(a) });
-        else if (t == SOUND)
-            soundMap.insert({ asset, LoadSound(a) });
-        else if (t == MUSIC)
-            musicMap.insert({ asset, LoadMusicStream(a) });
+            fontMap.emplace(asset, TTF_OpenFont(a, 16.0f));
+        else if (t == SOUND) {
+            auto sound{ std::make_unique<ma_sound>() };
+            ma_sound_init_from_file(Omni::SoundEngine(), a, 0, nullptr, nullptr, sound.get());
+            soundMap.emplace(asset, std::move(sound));
+        } else if (t == MUSIC) {
+            auto music{ std::make_unique<ma_sound>() };
+            ma_sound_init_from_file(Omni::SoundEngine(), a, MA_SOUND_FLAG_STREAM, nullptr, nullptr, music.get());
+            musicMap.emplace(asset, std::move(music));
+        }
 
         // Remove the loaded asset from the queue
         loadQueue.pop();
@@ -91,20 +87,22 @@ class Assets
         return size == 1;
     }
 
-    // Initialize queued assets for the given time (in seconds).
-    // NOTE: The timing is NOT accurate, some assets take longer to load than others!
-    // Returns true if all queued assets have been initialized.
-    bool update(double time)
+    /**
+     * Initialize queued assets for the given time (in milliseconds).
+     * NOTE: The timing is NOT accurate, some assets take longer to load than others!
+     * Returns true if all queued assets have been initialized.
+     */
+    bool update(Uint64 time)
     {
-        double start = GetTime();
-        while (GetTime() - start < time) {
+        Uint64 start{ SDL_GetTicks() };
+        while (SDL_GetTicks() - start < time) {
             if (update())
                 return true;
         }
         return false;
     }
 
-    // Initialize ALL queued assets for loading
+    /** Initialize ALL queued assets for loading. */
     void finishLoading()
     {
         while (!update())
@@ -113,48 +111,42 @@ class Assets
 
     /* ==================== GET LOADED AND INITIALIZED ASSETS ==================== */
 
-    Image &getImage(const std::string &fileName)
+    /** Returns the same (shared) surface, best to clone if editing!  */
+    SDL_Surface *getSurface(const std::string &fileName)
     {
-        return imageMap.at(fileName);
+        return surfaceMap.at(fileName);
     }
 
-    Texture2D &getTexture(const std::string &fileName)
+    SDL_Texture *getTexture(const std::string &fileName)
     {
         return textureMap.at(fileName);
     }
 
-    Font &getFont(const std::string &fileName)
+    /** Returns the specified font with a default size of 16.0f. Clone or resize if necessary! */
+    TTF_Font *getFont(const std::string &fileName)
     {
         return fontMap.at(fileName);
     }
 
-    Model &getModel(const std::string &fileName)
+    /** Returns the same (shared) loaded sound instance, clone to play! */
+    ma_sound *getSound(const std::string &fileName)
     {
-        return modelMap.at(fileName);
+        return soundMap.at(fileName).get();
     }
 
-    Wave &getWave(const std::string &fileName)
+    /** Returns the same (shared) loaded streamed sound instance, clone to play! */
+    ma_sound *getMusic(const std::string &fileName)
     {
-        return waveMap.at(fileName);
-    }
-
-    Sound &getSound(const std::string &fileName)
-    {
-        return soundMap.at(fileName);
-    }
-
-    Music &getMusic(const std::string &fileName)
-    {
-        return musicMap.at(fileName);
+        return musicMap.at(fileName).get();
     }
 
     /* ==================== UNLOAD ASSETS ==================== */
 
-    // Unloads and removes the specified asset, does not remove the asset from the load queue
+    /** Destroys and removes the specified asset, does not remove the asset from the load queue. */
     void unload(const std::string &fileName)
     {
         // Ensure the load() method was called on the asset
-        auto typeIterator = typeMap.find(fileName);
+        auto typeIterator{ typeMap.find(fileName) };
         if (typeIterator == typeMap.end()) {
             return;
         }
@@ -168,65 +160,47 @@ class Assets
         // 3. Unload the asset.
         // 4. Remove the asset from the type's map.
         switch (t) {
-        case IMAGE:
+        case SURFACE:
         {
-            auto asset = imageMap.find(fileName);
-            if (asset != imageMap.end()) {
-                UnloadImage(asset->second);
-                imageMap.erase(asset);
+            auto asset{ surfaceMap.find(fileName) };
+            if (asset != surfaceMap.end()) {
+                SDL_DestroySurface(asset->second);
+                surfaceMap.erase(asset);
             }
             break;
         }
         case TEXTURE:
         {
-            auto asset = textureMap.find(fileName);
+            auto asset{ textureMap.find(fileName) };
             if (asset != textureMap.end()) {
-                UnloadTexture(asset->second);
+                SDL_DestroyTexture(asset->second);
                 textureMap.erase(asset);
             }
             break;
         }
         case FONT:
         {
-            auto asset = fontMap.find(fileName);
+            auto asset{ fontMap.find(fileName) };
             if (asset != fontMap.end()) {
-                UnloadFont(asset->second);
+                TTF_CloseFont(asset->second);
                 fontMap.erase(asset);
-            }
-            break;
-        }
-        case MODEL:
-        {
-            auto asset = modelMap.find(fileName);
-            if (asset != modelMap.end()) {
-                UnloadModel(asset->second);
-                modelMap.erase(asset);
-            }
-            break;
-        }
-        case WAVE:
-        {
-            auto asset = waveMap.find(fileName);
-            if (asset != waveMap.end()) {
-                UnloadWave(asset->second);
-                waveMap.erase(asset);
             }
             break;
         }
         case SOUND:
         {
-            auto asset = soundMap.find(fileName);
+            auto asset{ soundMap.find(fileName) };
             if (asset != soundMap.end()) {
-                UnloadSound(asset->second);
+                ma_sound_uninit(asset->second.get());
                 soundMap.erase(asset);
             }
             break;
         }
         case MUSIC:
         {
-            auto asset = musicMap.find(fileName);
+            auto asset{ musicMap.find(fileName) };
             if (asset != musicMap.end()) {
-                UnloadMusicStream(asset->second);
+                ma_sound_uninit(asset->second.get());
                 musicMap.erase(asset);
             }
             break;
@@ -237,14 +211,17 @@ class Assets
         typeMap.erase(typeIterator);
     }
 
-    // Unloads and removes all assets, does not remove assets from the load queue
+    /** Unloads and removes all assets, does not remove assets from the load queue. */
     void unloadAll()
     {
-        while (!typeMap.empty())
-            unload(typeMap.begin()->first);
+        while (!typeMap.empty()) {
+            // Copy file name to avoid dangling reference when passed into unload()
+            std::string copyFileName{ typeMap.begin()->first };
+            unload(copyFileName);
+        }
     }
 
-    // Unload all assets
+    /** Unload all assets. */
     ~Assets()
     {
         unloadAll();
@@ -255,39 +232,37 @@ class Assets
 
     enum Type : unsigned char
     {
-        // TODO: Load shaders, materials, model animations
-        IMAGE,
+        SURFACE,
         TEXTURE,
         FONT,
-        MODEL,
-        WAVE,
         SOUND,
         MUSIC
     };
 
     /* ==================== ASSET MAPS ==================== */
 
-    std::unordered_map<std::string, Image> imageMap;
-    std::unordered_map<std::string, Texture2D> textureMap;
-    std::unordered_map<std::string, Font> fontMap;
-    std::unordered_map<std::string, Model> modelMap;
-    std::unordered_map<std::string, Wave> waveMap;
-    std::unordered_map<std::string, Sound> soundMap;
-    std::unordered_map<std::string, Music> musicMap;
+    std::unordered_map<std::string, SDL_Surface *> surfaceMap;
+    std::unordered_map<std::string, SDL_Texture *> textureMap;
+    std::unordered_map<std::string, TTF_Font *> fontMap;
+    std::unordered_map<std::string, std::unique_ptr<ma_sound>> soundMap;
+    std::unordered_map<std::string, std::unique_ptr<ma_sound>> musicMap;
 
     /* ==================== LOADING ==================== */
 
-    // Asset file names queued to load, linked-list for frequent asset insertions and removals
-    std::queue<std::string, std::list<std::string>> loadQueue;
+    /** Asset file names queued to load. */
+    std::queue<std::string> loadQueue;
 
-    // Keeps track of each asset's type
+    /** Keeps track of each asset's type. */
     std::unordered_map<std::string, Type> typeMap;
 
-    // Queues the asset file for loading and stores its type
+    /** Queues the asset file for loading and stores its type. */
     void load(const std::string &fileName, Type assetType)
     {
-        loadQueue.push(fileName);
-        typeMap.insert({ fileName, assetType });
+        // Ensure this asset hasn't called load() before
+        if (typeMap.find(fileName) == typeMap.end()) {
+            loadQueue.push(fileName);
+            typeMap.insert({ fileName, assetType });
+        }
     }
 };
 } // namespace Omni
