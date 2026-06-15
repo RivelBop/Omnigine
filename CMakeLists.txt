@@ -95,9 +95,3 @@ add_executable(${PROJECT_NAME} src/main.cpp
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE SDL3::SDL3 SDL3_image::SDL3_image SDL3_ttf::SDL3_ttf miniaudio)
-
-# Web Configurations
-if (${PLATFORM} STREQUAL "Web")
-    set_target_properties(${PROJECT_NAME} PROPERTIES SUFFIX ".html") # Tell Emscripten to build an example.html file.
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -s ASSERTIONS=1 -s WASM=1")
-endif()
