@@ -81,7 +81,10 @@ if (NOT miniaudio_FOUND)
   FetchContent_GetProperties(miniaudio)
   if (NOT miniaudio_POPULATED)
     set(FETCHCONTENT_QUIET NO)
-    FetchContent_MakeAvailable(miniaudio)
+    FetchContent_Populate(miniaudio)
+
+    # Exclude peripheral targets from the default build
+    add_subdirectory("${miniaudio_SOURCE_DIR}" "${miniaudio_BINARY_DIR}" EXCLUDE_FROM_ALL)
   endif()
 endif()
 
