@@ -131,6 +131,7 @@ struct AppState
 
 SDL_Window *window{ nullptr };
 SDL_Renderer *renderer{ nullptr };
+ma_engine *soundEngine{ nullptr };
 
 /* ========== SDL_AppEvent ========== */
 
@@ -158,7 +159,7 @@ std::vector<float> floatBuffer;
 
 /* ==================== OMNI DEFINITIONS ==================== */
 
-/* ========== WINDOW & RENDERER ========== */
+/* ========== ENGINE COMPONENTS ========== */
 
 inline SDL_Window *Omni::Window()
 {
@@ -168,6 +169,11 @@ inline SDL_Window *Omni::Window()
 inline SDL_Renderer *Omni::Renderer()
 {
     return internal::renderer;
+}
+
+inline ma_engine *Omni::SoundEngine()
+{
+    return internal::soundEngine;
 }
 
 /* ========== CAMERA ========== */
@@ -538,6 +544,7 @@ inline SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
         appState.soundEngine = nullptr;
         return SDL_APP_FAILURE;
     }
+    internal::soundEngine = appState.soundEngine;
 
     // After SDL3, the window, and miniaudio are prepared, call the user's Init() function
 #ifdef OMNI_SCENE
@@ -663,5 +670,6 @@ inline void SDL_AppQuit(void *appstate, SDL_AppResult result)
         ma_engine_uninit(soundEngine);
         delete soundEngine;
         soundEngine = nullptr;
+        internal::soundEngine = nullptr;
     }
 }

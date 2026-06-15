@@ -1,15 +1,20 @@
 #pragma once
 
 #include <SDL3/SDL.h>
+#include <miniaudio.h>
 
 namespace Omni
 {
-/* ==================== WINDOW & RENDERER ==================== */
+/* ==================== ENGINE COMPONENTS ==================== */
 
-/** Access to the window pointer. */
+/** Access to the SDL3 window. */
 [[nodiscard]] SDL_Window *Window();
-/** Access to the renderer pointer. */
+/** Access to the SDL3 renderer. */
 [[nodiscard]] SDL_Renderer *Renderer();
+/** Access to the miniaudio sound engine. */
+[[nodiscard]] ma_engine *SoundEngine();
+
+/* ==================== RENDER COLOR ==================== */
 
 /** Calls SDL_SetRenderDrawColorFloat() for the global Renderer(). */
 inline bool SetRenderColor(Uint8 r, Uint8 g, Uint8 b, Uint8 a)
