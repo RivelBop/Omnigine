@@ -189,7 +189,7 @@ class Atlas
     }
 
     /** Returns all texture regions (in indexed order) with the name provided. */
-    std::vector<SDL_Texture *> &get(const std::string &regionName)
+    const std::vector<SDL_Texture *> &get(const std::string &regionName)
     {
         return regionMap.at(regionName);
     }
