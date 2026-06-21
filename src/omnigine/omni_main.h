@@ -540,7 +540,7 @@ inline SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
     // Initialize miniaudio engine
     appState.soundEngine = new ma_engine;
     if (ma_engine_init(nullptr, appState.soundEngine) != MA_SUCCESS) {
-        SDL_LogError(SDL_LOG_CATEGORY_AUDIO, "Couldn't create miniaudio engine!");
+        SDL_LogError(SDL_LOG_CATEGORY_AUDIO, "Couldn't create miniaudio engine.");
         delete appState.soundEngine;
         appState.soundEngine = nullptr;
         return SDL_APP_FAILURE;
