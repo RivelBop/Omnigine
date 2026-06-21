@@ -14,36 +14,37 @@ namespace Omni
 class Atlas
 {
   public:
+    Atlas()
+    {
+    }
+
     Atlas(const std::string &fileName, SDL_Renderer *renderer) : atlasFile(fileName)
     {
         // Open the atlas file
         std::ifstream f(fileName);
 
         // Check if the atlas file has successfully opened
-        if (!f.is_open()) {
-            SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Cannot open the atlas file: %s", fileName.c_str());
-            return;
-        }
+        if (!f.is_open())
+            throw std::runtime_error("Cannot open atlas file: " + fileName);
         std::string readData;
 
         // Get the atlas image
         std::getline(f, readData);
         size_t directory{ fileName.find_last_of('/') };
         if (directory != std::string::npos)
-            readData.insert(0, readData.append(fileName.substr(0, directory)));
+            readData.insert(0, fileName.substr(0, directory + 1));
         SDL_Surface *atlasImg{ IMG_Load(readData.c_str()) };
         if (!atlasImg) {
-            SDL_LogError(SDL_LOG_CATEGORY_VIDEO, "Unable to retrieve image file for atlas!");
-            return;
+            f.close();
+            throw std::runtime_error("Cannot create surface from atlas image.");
         }
 
         // Skip following data (size, repeat)
         f.ignore(LONG_MAX, '\n');
         if (!f.ignore(LONG_MAX, '\n')) {
-            SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Unable to parse atlas file, please ensure the atlas is formatted correctly!");
             SDL_DestroySurface(atlasImg);
             f.close();
-            return;
+            throw std::runtime_error("Unable to parse atlas file, please ensure the atlas is formatted correctly.");
         }
 
         // Create textures for atlas regions
@@ -56,8 +57,8 @@ class Atlas
                 state++;
 
                 bool exitLoop{ true };
-                for (int i{ 0 }; i < readData.length(); i++) {
-                    if (!std::isspace(static_cast<unsigned char>(readData[i]))) {
+                for (char c : readData) {
+                    if (!std::isspace(static_cast<unsigned char>(c))) {
                         exitLoop = false;
                         break;
                     }
@@ -122,16 +123,24 @@ class Atlas
                 if (!tempSurface || !SDL_BlitSurface(atlasImg, &srcrect, tempSurface, nullptr)) {
                     if (tempSurface)
                         SDL_DestroySurface(tempSurface);
-                    SDL_LogError(SDL_LOG_CATEGORY_VIDEO, "Unable to create temporary surface for texture region generation!");
-                    return;
+                    SDL_DestroySurface(atlasImg);
+                    f.close();
+
+                    free();
+                    regionMap.clear();
+                    throw std::runtime_error("Unable to create temporary surface for texture region generation.");
                 }
 
                 // Create and store a texture region from the surface
                 SDL_Texture *textureRegion{ SDL_CreateTextureFromSurface(renderer, tempSurface) };
                 if (!textureRegion) {
                     SDL_DestroySurface(tempSurface);
-                    SDL_LogError(SDL_LOG_CATEGORY_VIDEO, "Unable to create texture region from temporary surface!");
-                    return;
+                    SDL_DestroySurface(atlasImg);
+                    f.close();
+
+                    free();
+                    regionMap.clear();
+                    throw std::runtime_error("Unable to create texture region from temporary surface.");
                 }
                 indexedRegions[index] = textureRegion;
                 SDL_DestroySurface(tempSurface);
@@ -140,13 +149,43 @@ class Atlas
             }
         }
 
-        // Bounds must always be the last portion of the atlas (which should have set the state back to 0)
-        if (state != 0)
-            SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Unable to parse atlas file, please ensure the atlas is formatted correctly!");
-
         // Close atlas file
         SDL_DestroySurface(atlasImg);
         f.close();
+
+        // Bounds must always be the last portion of the atlas (which should have set the state back to 0)
+        if (state != 0) {
+            free();
+            regionMap.clear();
+            throw std::runtime_error("Unable to parse atlas file, please ensure the atlas is formatted correctly.");
+        }
+    }
+
+    Atlas(const Atlas &) = delete;
+
+    Atlas(Atlas &&atlas) noexcept : atlasFile(std::move(atlas.atlasFile)), regionMap(std::move(atlas.regionMap))
+    {
+    }
+
+    ~Atlas()
+    {
+        free();
+    }
+
+    Atlas &operator=(const Atlas &) = delete;
+
+    Atlas &operator=(Atlas &&atlas) noexcept
+    {
+        if (this != &atlas) {
+            // Dispose of this regionMap
+            free();
+            regionMap.clear();
+
+            // Move the data from the other atlas to this
+            atlasFile = std::move(atlas.atlasFile);
+            regionMap = std::move(atlas.regionMap);
+        }
+        return *this;
     }
 
     /** Returns all texture regions (in indexed order) with the name provided. */
@@ -158,5 +197,13 @@ class Atlas
   private:
     std::string atlasFile;
     std::unordered_map<std::string, std::vector<SDL_Texture *>> regionMap;
+
+    void free()
+    {
+        for (auto &r : regionMap) {
+            for (SDL_Texture *t : r.second)
+                SDL_DestroyTexture(t);
+        }
+    }
 };
 } // namespace Omni
