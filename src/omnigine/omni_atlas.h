@@ -1,6 +1,5 @@
 #pragma once
 
-#include <SDL3/SDL.h>
 #include <SDL3_image/SDL_image.h>
 
 #include <climits>
@@ -8,6 +7,8 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+
+#include "omni_sdl.h"
 
 namespace Omni
 {
@@ -18,7 +19,7 @@ class Atlas
     {
     }
 
-    Atlas(const std::string &fileName, SDL_Renderer *renderer) : atlasFile(fileName)
+    Atlas(const std::string &fileName, SDL_Renderer *renderer = Omni::Renderer())
     {
         // Open the atlas file
         std::ifstream f(fileName);
@@ -163,7 +164,7 @@ class Atlas
 
     Atlas(const Atlas &) = delete;
 
-    Atlas(Atlas &&atlas) noexcept : atlasFile(std::move(atlas.atlasFile)), regionMap(std::move(atlas.regionMap))
+    Atlas(Atlas &&atlas) noexcept : regionMap(std::move(atlas.regionMap))
     {
     }
 
@@ -182,7 +183,6 @@ class Atlas
             regionMap.clear();
 
             // Move the data from the other atlas to this
-            atlasFile = std::move(atlas.atlasFile);
             regionMap = std::move(atlas.regionMap);
         }
         return *this;
@@ -195,7 +195,6 @@ class Atlas
     }
 
   private:
-    std::string atlasFile;
     std::unordered_map<std::string, std::vector<SDL_Texture *>> regionMap;
 
     void free()
