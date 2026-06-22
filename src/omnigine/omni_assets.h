@@ -59,7 +59,7 @@ class Assets
 
         // Retrieve the first queued asset and get its type
         std::string asset{ loadQueue.front() };
-        const Type &t{ typeMap.at(asset) };
+        Type t{ typeMap.at(asset) };
 
         // Get C String representation of asset file
         const char *a{ asset.c_str() };
@@ -171,7 +171,7 @@ class Assets
         }
 
         // Retrieve the asset's type
-        const Type &t{ typeIterator->second };
+        Type t{ typeIterator->second };
 
         // Unload each asset from their appropriate map
         // 1. Find the code block with the correct asset type via the switch-case.
