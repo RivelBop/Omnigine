@@ -1,12 +1,13 @@
 #pragma once
 
-#include <SDL3_image/SDL_image.h>
-
 #include <climits>
 #include <fstream>
+#include <stdexcept>
 #include <string>
 #include <unordered_map>
 #include <vector>
+
+#include <SDL3_image/SDL_image.h>
 
 #include "omni_sdl.h"
 
@@ -15,11 +16,9 @@ namespace Omni
 class Atlas
 {
   public:
-    Atlas()
-    {
-    }
+    Atlas() = default;
 
-    Atlas(const std::string &fileName, SDL_Renderer *renderer = Omni::Renderer())
+    Atlas(const std::string &fileName)
     {
         // Open the atlas file
         std::ifstream f(fileName);
@@ -52,6 +51,7 @@ class Atlas
         Uint8 state{ 0 };
         std::string regionName;
         Uint32 index{ 0 };
+        SDL_Renderer *renderer{ Omni::Renderer() };
         while (std::getline(f, readData)) {
             // Name
             if (state == 0) {
@@ -113,7 +113,7 @@ class Atlas
                 };
 
                 // Retrieve (or automatically create) the vector of regions
-                std::vector<SDL_Texture *> &indexedRegions = regionMap[regionName];
+                std::vector<SDL_Texture *> &indexedRegions{ regionMap[regionName] };
 
                 // Ensure the located vector of indexed regions is the appropriate size
                 if (indexedRegions.size() < index + 1)
@@ -189,7 +189,7 @@ class Atlas
     }
 
     /** Returns all texture regions (in indexed order) with the name provided. */
-    const std::vector<SDL_Texture *> &get(const std::string &regionName)
+    const std::vector<SDL_Texture *> &get(const std::string &regionName) const
     {
         return regionMap.at(regionName);
     }
