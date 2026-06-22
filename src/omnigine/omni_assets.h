@@ -1,14 +1,16 @@
 #pragma once
 
-#include <SDL3_image/SDL_image.h>
-#include <SDL3_ttf/SDL_ttf.h>
-
 #include <memory>
 #include <queue>
+#include <stdexcept>
 #include <string>
 #include <unordered_map>
 
-#include "omni.h"
+#include <SDL3_image/SDL_image.h>
+#include <SDL3_ttf/SDL_ttf.h>
+
+#include "omni_miniaudio.h"
+#include "omni_sdl.h"
 
 namespace Omni
 {
@@ -56,31 +58,48 @@ class Assets
             return true;
 
         // Retrieve the first queued asset and get its type
-        std::string &asset = loadQueue.front();
-        const Type &t = typeMap.at(asset);
+        std::string asset{ loadQueue.front() };
+        const Type &t{ typeMap.at(asset) };
 
         // Get C String representation of asset file
         const char *a{ asset.c_str() };
 
         // Load each asset into their appropriate map
-        if (t == SURFACE)
-            surfaceMap.emplace(asset, IMG_Load(a));
-        else if (t == TEXTURE)
-            textureMap.emplace(asset, IMG_LoadTexture(Omni::Renderer(), a));
-        else if (t == FONT)
-            fontMap.emplace(asset, TTF_OpenFont(a, 16.0f));
-        else if (t == SOUND) {
+        bool throwException{ false };
+        if (t == SURFACE) {
+            SDL_Surface *surface{ IMG_Load(a) };
+            if (surface)
+                surfaceMap.emplace(asset, surface);
+            throwException = !surface;
+        } else if (t == TEXTURE) {
+            SDL_Texture *texture{ IMG_LoadTexture(Omni::Renderer(), a) };
+            if (texture)
+                textureMap.emplace(asset, texture);
+            throwException = !texture;
+        } else if (t == FONT) {
+            TTF_Font *font{ TTF_OpenFont(a, 16.0f) };
+            if (font)
+                fontMap.emplace(asset, font);
+            throwException = !font;
+        } else if (t == SOUND) {
             auto sound{ std::make_unique<ma_sound>() };
-            ma_sound_init_from_file(Omni::SoundEngine(), a, 0, nullptr, nullptr, sound.get());
-            soundMap.emplace(asset, std::move(sound));
+            ma_result result{ ma_sound_init_from_file(Omni::SoundEngine(), a, 0, nullptr, nullptr, sound.get()) };
+            if (result == MA_SUCCESS)
+                soundMap.emplace(asset, std::move(sound));
+            throwException = result != MA_SUCCESS;
         } else if (t == MUSIC) {
             auto music{ std::make_unique<ma_sound>() };
-            ma_sound_init_from_file(Omni::SoundEngine(), a, MA_SOUND_FLAG_STREAM, nullptr, nullptr, music.get());
-            musicMap.emplace(asset, std::move(music));
+            ma_result result{ ma_sound_init_from_file(Omni::SoundEngine(), a, MA_SOUND_FLAG_STREAM, nullptr, nullptr, music.get()) };
+            if (result == MA_SUCCESS)
+                musicMap.emplace(asset, std::move(music));
+            throwException = result != MA_SUCCESS;
         }
 
         // Remove the loaded asset from the queue
         loadQueue.pop();
+
+        if (throwException)
+            throw std::runtime_error("Failed to load asset: " + asset);
 
         // Check if loading is complete
         // If there was one asset in the queue, it was loaded so empty queue
@@ -112,30 +131,30 @@ class Assets
     /* ==================== GET LOADED AND INITIALIZED ASSETS ==================== */
 
     /** Returns the same (shared) surface, best to clone if editing!  */
-    SDL_Surface *getSurface(const std::string &fileName)
+    SDL_Surface *getSurface(const std::string &fileName) const
     {
         return surfaceMap.at(fileName);
     }
 
-    SDL_Texture *getTexture(const std::string &fileName)
+    SDL_Texture *getTexture(const std::string &fileName) const
     {
         return textureMap.at(fileName);
     }
 
     /** Returns the specified font with a default size of 16.0f. Clone or resize if necessary! */
-    TTF_Font *getFont(const std::string &fileName)
+    TTF_Font *getFont(const std::string &fileName) const
     {
         return fontMap.at(fileName);
     }
 
     /** Returns the same (shared) loaded sound instance, clone to play! */
-    ma_sound *getSound(const std::string &fileName)
+    ma_sound *getSound(const std::string &fileName) const
     {
         return soundMap.at(fileName).get();
     }
 
     /** Returns the same (shared) loaded streamed sound instance, clone to play! */
-    ma_sound *getMusic(const std::string &fileName)
+    ma_sound *getMusic(const std::string &fileName) const
     {
         return musicMap.at(fileName).get();
     }
@@ -152,7 +171,7 @@ class Assets
         }
 
         // Retrieve the asset's type
-        const Type &t = typeIterator->second;
+        const Type &t{ typeIterator->second };
 
         // Unload each asset from their appropriate map
         // 1. Find the code block with the correct asset type via the switch-case.
@@ -211,15 +230,31 @@ class Assets
         typeMap.erase(typeIterator);
     }
 
-    /** Unloads and removes all assets, does not remove assets from the load queue. */
+    /** Unloads and removes all assets (including from the load queue). */
     void unloadAll()
     {
+        while (!loadQueue.empty()) {
+            std::string asset{ loadQueue.front() };
+            typeMap.erase(asset);
+            loadQueue.pop();
+        }
+
         while (!typeMap.empty()) {
             // Copy file name to avoid dangling reference when passed into unload()
             std::string copyFileName{ typeMap.begin()->first };
             unload(copyFileName);
         }
     }
+
+    Assets() = default;
+
+    Assets(const Assets &) = delete;
+
+    Assets(Assets &&) noexcept = delete;
+
+    Assets &operator=(const Assets &) = delete;
+
+    Assets &operator=(Assets &&) noexcept = delete;
 
     /** Unload all assets. */
     ~Assets()
