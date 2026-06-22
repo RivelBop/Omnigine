@@ -6,15 +6,13 @@
 
 /* ==================== IMPORTS ==================== */
 
-#define MINIAUDIO_IMPLEMENTATION
-#include <miniaudio.h>
+#include <vector>
 
-/** Use callbacks instead of main(). */
 #define SDL_MAIN_USE_CALLBACKS 1
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
-
-#include <vector>
+#define MINIAUDIO_IMPLEMENTATION
+#include <miniaudio.h>
 
 #include "omni.h"
 #ifdef OMNI_SCENE
@@ -52,13 +50,6 @@ struct WindowProperties
     int height{ 480 };
     /** The window flags to pass into SDL_CreateWindowAndRenderer(), no flags by default. */
     SDL_WindowFlags windowFlags{ 0 };
-
-    /* ========== COPYING & MOVING ========== */
-
-    WindowProperties(const WindowProperties &) = delete;
-    WindowProperties &operator=(const WindowProperties &) = delete;
-    WindowProperties(WindowProperties &&) = delete;
-    WindowProperties &operator=(WindowProperties &&) = delete;
 
     /* ========== OPERATORS ========== */
 
@@ -180,7 +171,7 @@ inline ma_engine *Omni::SoundEngine()
 
 inline void Omni::RenderToCamera(const Omni::Camera *camera)
 {
-    Omni::Camera &cam = internal::camera;
+    Omni::Camera &cam{ internal::camera };
 
     // Copy the provided camera's data into the internal camera and set the renderer's scale
     if (camera) {
@@ -275,7 +266,7 @@ inline bool Omni::RenderRects(const SDL_FRect *rects, int count)
         // SDL_RenderRects() also iterates and calls SDL_RenderRect() for each rect.
         // For efficiency, we do the same but reuse camRect to apply the camera position.
         for (int i{ 0 }; i < count; i++) {
-            const SDL_FRect &rect = rects[i];
+            const SDL_FRect &rect{ rects[i] };
             camRect.x = rect.x - x;
             camRect.y = rect.y - y;
             camRect.w = rect.w;
@@ -549,7 +540,7 @@ inline SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
 
     // After SDL3, the window, and miniaudio are prepared, call the user's Init() function
 #ifdef OMNI_SCENE
-    Omni::Scene *&currentScene = appState.currentScene;
+    Omni::Scene *&currentScene{ appState.currentScene };
     currentScene = Init(argc, argv);
     if (currentScene)
         currentScene->init();
@@ -563,7 +554,7 @@ inline SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
 /* This function runs when a new event (mouse input, keypresses, etc.) occurs. */
 inline SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
 {
-    internal::AppState &appState = *static_cast<internal::AppState *>(appstate);
+    internal::AppState &appState{ *static_cast<internal::AppState *>(appstate) };
 
     if (event->type == SDL_EVENT_QUIT) {
         appState.quit = true;
@@ -606,17 +597,17 @@ inline SDL_AppResult SDL_AppIterate(void *appstate)
     }
     frames += 1;
 
-    internal::AppState &appState = *static_cast<internal::AppState *>(appstate);
+    internal::AppState &appState{ *static_cast<internal::AppState *>(appstate) };
 
     // Clear the window to black (automatic for the user)
     SDL_SetRenderDrawColor(appState.renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
     SDL_RenderClear(appState.renderer);
 
 #ifdef OMNI_SCENE
-    Omni::Scene *&nextScene = appState.nextScene;
+    Omni::Scene *&nextScene{ appState.nextScene };
     if (!nextScene)
         return SDL_APP_SUCCESS;
-    Omni::Scene *&currentScene = appState.currentScene;
+    Omni::Scene *&currentScene{ appState.currentScene };
 
     // Changing Scenes: Dispose and free current scene, initialize the next scene and set it as current
     if (currentScene != nextScene) {
@@ -654,10 +645,10 @@ inline SDL_AppResult SDL_AppIterate(void *appstate)
 /* This function runs once at shutdown; SDL will clean up the window/renderer for us. */
 inline void SDL_AppQuit(void *appstate, SDL_AppResult result)
 {
-    internal::AppState &appState = *static_cast<internal::AppState *>(appstate);
+    internal::AppState &appState{ *static_cast<internal::AppState *>(appstate) };
 #ifdef OMNI_SCENE
     // Dispose remaining scene (if available)
-    Omni::Scene *&currentScene = appState.currentScene;
+    Omni::Scene *&currentScene{ appState.currentScene };
     if (currentScene && currentScene->dispose()) {
         delete currentScene;
         currentScene = nullptr;
@@ -665,7 +656,7 @@ inline void SDL_AppQuit(void *appstate, SDL_AppResult result)
     }
 #endif
     // Since the sound engine loads last, Init() is called right after so Dispose() must be called
-    ma_engine *&soundEngine = appState.soundEngine;
+    ma_engine *&soundEngine{ appState.soundEngine };
     if (soundEngine) {
         Dispose();
         ma_engine_uninit(soundEngine);
