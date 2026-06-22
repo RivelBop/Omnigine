@@ -1,7 +1,7 @@
 #pragma once
 
-#include <SDL3_TTF/SDL_ttf.h>
 #include <SDL3_image/SDL_image.h>
+#include <SDL3_ttf/SDL_ttf.h>
 
 #include <memory>
 #include <queue>
