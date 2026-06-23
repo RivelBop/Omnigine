@@ -92,6 +92,7 @@ endif()
 add_executable(${PROJECT_NAME} src/main.cpp
         src/omnigine/omni_assets.h
         src/omnigine/omni_atlas.h
+        src/omnigine/omni_info.h
         src/omnigine/omni_input.h
         src/omnigine/omni_main.h
         src/omnigine/omni_miniaudio.h
