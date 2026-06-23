@@ -54,14 +54,14 @@ struct WindowProperties
     /* ========== OPERATORS ========== */
 
     /** Add to the init flags. */
-    WindowProperties &operator|=(const SDL_InitFlags addInitFlags)
+    WindowProperties &operator|=(SDL_InitFlags addInitFlags)
     {
         initFlags |= addInitFlags;
         return *this;
     }
 
     /** Add to the window flags. */
-    WindowProperties &operator|=(const SDL_WindowFlags addWindowFlags)
+    WindowProperties &operator|=(SDL_WindowFlags addWindowFlags)
     {
         windowFlags |= addWindowFlags;
         return *this;

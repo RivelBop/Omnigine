@@ -9,7 +9,7 @@
 
 #include <SDL3_image/SDL_image.h>
 
-#include "omni_sdl.h"
+#include "omni_render.h"
 
 namespace Omni
 {
@@ -189,7 +189,7 @@ class Atlas
     }
 
     /** Returns all texture regions (in indexed order) with the name provided. */
-    const std::vector<SDL_Texture *> &get(const std::string &regionName) const
+    [[nodiscard]] const std::vector<SDL_Texture *> &get(const std::string &regionName) const
     {
         return regionMap.at(regionName);
     }

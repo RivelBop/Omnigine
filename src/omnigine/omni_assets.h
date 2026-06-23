@@ -10,7 +10,7 @@
 #include <SDL3_ttf/SDL_ttf.h>
 
 #include "omni_miniaudio.h"
-#include "omni_sdl.h"
+#include "omni_render.h"
 
 namespace Omni
 {
@@ -50,7 +50,7 @@ class Assets
      * Get the first queued asset and initialize it.
      * Returns true if all queued assets have been initialized.
      */
-    bool update()
+    [[nodiscard]] bool update()
     {
         // Initial size check to ensure the assets aren't already done loading
         size_t size{ loadQueue.size() };
@@ -111,7 +111,7 @@ class Assets
      * NOTE: The timing is NOT accurate, some assets take longer to load than others!
      * Returns true if all queued assets have been initialized.
      */
-    bool update(Uint64 time)
+    [[nodiscard]] bool update(Uint64 time)
     {
         Uint64 start{ SDL_GetTicks() };
         while (SDL_GetTicks() - start < time) {
@@ -131,30 +131,30 @@ class Assets
     /* ==================== GET LOADED AND INITIALIZED ASSETS ==================== */
 
     /** Returns the same (shared) surface, best to clone if editing!  */
-    SDL_Surface *getSurface(const std::string &fileName) const
+    [[nodiscard]] SDL_Surface *getSurface(const std::string &fileName) const
     {
         return surfaceMap.at(fileName);
     }
 
-    SDL_Texture *getTexture(const std::string &fileName) const
+    [[nodiscard]] SDL_Texture *getTexture(const std::string &fileName) const
     {
         return textureMap.at(fileName);
     }
 
     /** Returns the specified font with a default size of 16.0f. Clone or resize if necessary! */
-    TTF_Font *getFont(const std::string &fileName) const
+    [[nodiscard]] TTF_Font *getFont(const std::string &fileName) const
     {
         return fontMap.at(fileName);
     }
 
     /** Returns the same (shared) loaded sound instance, clone to play! */
-    ma_sound *getSound(const std::string &fileName) const
+    [[nodiscard]] ma_sound *getSound(const std::string &fileName) const
     {
         return soundMap.at(fileName).get();
     }
 
     /** Returns the same (shared) loaded streamed sound instance, clone to play! */
-    ma_sound *getMusic(const std::string &fileName) const
+    [[nodiscard]] ma_sound *getMusic(const std::string &fileName) const
     {
         return musicMap.at(fileName).get();
     }
