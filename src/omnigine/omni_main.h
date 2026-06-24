@@ -71,7 +71,7 @@ struct WindowProperties
 
 /* ==================== USER FUNCTIONS ==================== */
 
-/** Provide the necessary properties to initialize an SDL3 window. */
+/** Provide the necessary properties to initialize an SDL window. */
 static WindowProperties InitWindow(int argc, char *argv[]);
 
 #ifdef OMNI_SCENE
@@ -91,7 +91,7 @@ static bool Init(int argc, char *argv[]);
 static bool Render(float dt);
 #endif
 
-/** Called once in SDL3's AppQuit callback function. */
+/** Called once in SDL's AppQuit callback function. */
 static void Dispose();
 
 /* ==================== INTERNAL ==================== */
@@ -515,7 +515,7 @@ inline Uint32 Omni::FPS()
     return internal::fps;
 }
 
-/* ==================== SDL3 CALLBACK SETUP ==================== */
+/* ==================== SDL CALLBACK SETUP ==================== */
 
 /* Runs once at startup. */
 inline SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
@@ -564,7 +564,7 @@ inline SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
     }
     internal::soundEngine = appState.soundEngine;
 
-    // After SDL3, the window, and miniaudio are prepared, call the user's Init() function
+    // After SDL, the window, and miniaudio are prepared, call the user's Init() function
 #ifdef OMNI_SCENE
     Omni::Scene *&currentScene{ appState.currentScene };
     currentScene = Init(argc, argv);
