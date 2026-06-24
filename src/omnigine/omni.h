@@ -1,8 +1,7 @@
 #pragma once
 
-namespace Omni {
-    // The default, ideal window width
-    extern const int WIDTH;
-    // The default, ideal window height
-    extern const int HEIGHT;
-}
+#include "omni_info.h"
+#include "omni_input.h"
+#include "omni_miniaudio.h"
+#include "omni_render.h"
+#include "omni_window.h"

@@ -1,15 +1,20 @@
 #include "omnigine/omni_main.h"
 
-void Init() {
+WindowProperties InitWindow(int argc, char *argv[])
+{
+    return {};
 }
 
-bool Render(float dt) {
-    BeginDrawing();
-        ClearBackground(BLACK);
-        DrawText("Hello World!", 0, 0, 52, WHITE);
-    EndDrawing();
+bool Init(int argc, char *argv[])
+{
     return true;
 }
 
-void Dispose() {
+bool Render(float dt)
+{
+    return true;
+}
+
+void Dispose()
+{
 }
