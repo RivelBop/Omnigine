@@ -108,9 +108,13 @@ struct AppState
     ma_engine *soundEngine{ nullptr };
 
     bool quit{ false };
+
     bool keysPressed[SDL_SCANCODE_COUNT]{};
     bool keysJustPressed[SDL_SCANCODE_COUNT]{};
     bool keyPressed{ false };
+
+    Uint8 mousePressed{ 0 };
+    Uint8 mouseJustPressed{ 0 };
 
 #ifdef OMNI_SCENE
     Omni::Scene *currentScene{ nullptr };
@@ -128,6 +132,8 @@ ma_engine *soundEngine{ nullptr };
 
 const bool *keysPressed{ nullptr };
 const bool *keysJustPressed{ nullptr };
+Uint8 mousePressed{ 0 };
+Uint8 mouseJustPressed{ 0 };
 
 /* ========== SDL_AppIterate ========== */
 
@@ -148,26 +154,32 @@ std::vector<float> floatBuffer;
 } // namespace internal
 } // namespace
 
-/* ==================== OMNI DEFINITIONS ==================== */
-
-/* ========== ENGINE COMPONENTS ========== */
+/* ==================== OMNI_WINDOW.H ==================== */
 
 inline SDL_Window *Omni::Window()
 {
     return internal::window;
 }
 
+/* ==================== OMNI_RENDER.H ==================== */
+
+/* ========== GLOBAL RENDERER ========== */
+
 inline SDL_Renderer *Omni::Renderer()
 {
     return internal::renderer;
 }
+
+/* ==================== OMNI_MINIAUDIO.H ==================== */
 
 inline ma_engine *Omni::SoundEngine()
 {
     return internal::soundEngine;
 }
 
-/* ========== CAMERA ========== */
+/* ==================== OMNI_RENDER.H ==================== */
+
+/* ========== CAMERA-BASED RENDERING ========== */
 
 inline void Omni::RenderToCamera(const Omni::Camera *camera)
 {
@@ -455,7 +467,9 @@ inline bool Omni::RenderDebugTextFormat(float x, float y, const char *fmt, ...)
     return retval;
 }
 
-/* ========== INPUTS ========== */
+/* ==================== OMNI_INPUT.H ==================== */
+
+/* ========== KEYBOARD ========== */
 
 inline bool Omni::IsKeyPressed(SDL_Scancode key)
 {
@@ -477,7 +491,19 @@ inline bool Omni::IsKeyJustPressed(SDL_Keycode key)
     return internal::keysJustPressed[SDL_GetScancodeFromKey(key, nullptr)];
 }
 
-/* ========== GAME LOOP ========== */
+/* ========== MOUSE ========== */
+
+inline bool Omni::IsMousePressed(Uint8 button)
+{
+    return internal::mousePressed & SDL_BUTTON_MASK(button);
+}
+
+inline bool Omni::IsMouseJustPressed(Uint8 button)
+{
+    return internal::mouseJustPressed & SDL_BUTTON_MASK(button);
+}
+
+/* ==================== OMNI_INFO.H ==================== */
 
 inline float Omni::DeltaTime()
 {
@@ -572,6 +598,14 @@ inline SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
         SDL_Scancode key{ event->key.scancode };
         appState.keysPressed[key] = false;
         appState.keysJustPressed[key] = false;
+    } else if (event->type == SDL_EVENT_MOUSE_BUTTON_DOWN) {
+        Uint8 buttonMask{ static_cast<Uint8>(SDL_BUTTON_MASK(event->button.button)) };
+        appState.mousePressed |= buttonMask;
+        appState.mouseJustPressed |= buttonMask;
+    } else if (event->type == SDL_EVENT_MOUSE_BUTTON_UP) {
+        Uint8 noButtonMask{ static_cast<Uint8>(~SDL_BUTTON_MASK(event->button.button)) };
+        appState.mousePressed &= noButtonMask;
+        appState.mouseJustPressed &= noButtonMask;
     }
 
     return SDL_APP_CONTINUE;
@@ -598,6 +632,10 @@ inline SDL_AppResult SDL_AppIterate(void *appstate)
     frames += 1;
 
     internal::AppState &appState{ *static_cast<internal::AppState *>(appstate) };
+
+    // Update the global interal mouse flags using the up-to-date appstate flags
+    internal::mousePressed = appState.mousePressed;
+    internal::mouseJustPressed = appState.mouseJustPressed;
 
     // Clear the window to black (automatic for the user)
     SDL_SetRenderDrawColor(appState.renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
@@ -638,6 +676,7 @@ inline SDL_AppResult SDL_AppIterate(void *appstate)
         memset(appState.keysJustPressed, 0, SDL_SCANCODE_COUNT * sizeof(bool));
         appState.keyPressed = false;
     }
+    appState.mouseJustPressed = 0;
 
     return SDL_APP_CONTINUE;
 }
