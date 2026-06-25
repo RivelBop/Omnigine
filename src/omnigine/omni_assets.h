@@ -9,6 +9,7 @@
 #include <SDL3_image/SDL_image.h>
 #include <SDL3_ttf/SDL_ttf.h>
 
+#include "omni_atlas.h"
 #include "omni_miniaudio.h"
 #include "omni_render.h"
 
@@ -27,6 +28,11 @@ class Assets
     void loadTexture(const std::string &fileName)
     {
         load(fileName, TEXTURE);
+    }
+
+    void loadAtlas(const std::string &fileName)
+    {
+        load(fileName, ATLAS);
     }
 
     void loadFont(const std::string &fileName)
@@ -72,10 +78,17 @@ class Assets
                 surfaceMap.emplace(asset, surface);
             throwException = !surface;
         } else if (t == TEXTURE) {
-            SDL_Texture *texture{ IMG_LoadTexture(Omni::Renderer(), a) };
+            SDL_Texture *texture{ IMG_LoadTexture(Renderer(), a) };
             if (texture)
                 textureMap.emplace(asset, texture);
             throwException = !texture;
+        } else if (t == ATLAS) {
+            try {
+                atlasMap.emplace(asset, Atlas(asset));
+            } catch (std::runtime_error e) {
+                SDL_LogError(SDL_LOG_CATEGORY_ERROR, "%s", e.what());
+                throwException = true;
+            }
         } else if (t == FONT) {
             TTF_Font *font{ TTF_OpenFont(a, 16.0f) };
             if (font)
@@ -83,13 +96,13 @@ class Assets
             throwException = !font;
         } else if (t == SOUND) {
             auto sound{ std::make_unique<ma_sound>() };
-            ma_result result{ ma_sound_init_from_file(Omni::SoundEngine(), a, 0, nullptr, nullptr, sound.get()) };
+            ma_result result{ ma_sound_init_from_file(SoundEngine(), a, 0, nullptr, nullptr, sound.get()) };
             if (result == MA_SUCCESS)
                 soundMap.emplace(asset, std::move(sound));
             throwException = result != MA_SUCCESS;
         } else if (t == MUSIC) {
             auto music{ std::make_unique<ma_sound>() };
-            ma_result result{ ma_sound_init_from_file(Omni::SoundEngine(), a, MA_SOUND_FLAG_STREAM, nullptr, nullptr, music.get()) };
+            ma_result result{ ma_sound_init_from_file(SoundEngine(), a, MA_SOUND_FLAG_STREAM, nullptr, nullptr, music.get()) };
             if (result == MA_SUCCESS)
                 musicMap.emplace(asset, std::move(music));
             throwException = result != MA_SUCCESS;
@@ -139,6 +152,11 @@ class Assets
     [[nodiscard]] SDL_Texture *getTexture(const std::string &fileName) const
     {
         return textureMap.at(fileName);
+    }
+
+    [[nodiscard]] const Atlas &getAtlas(const std::string &fileName) const
+    {
+        return atlasMap.at(fileName);
     }
 
     /** Returns the specified font with a default size of 16.0f. Clone or resize if necessary! */
@@ -194,6 +212,14 @@ class Assets
             if (asset != textureMap.end()) {
                 SDL_DestroyTexture(asset->second);
                 textureMap.erase(asset);
+            }
+            break;
+        }
+        case ATLAS:
+        {
+            auto asset{ atlasMap.find(fileName) };
+            if (asset != atlasMap.end()) {
+                atlasMap.erase(asset);
             }
             break;
         }
@@ -269,6 +295,7 @@ class Assets
     {
         SURFACE,
         TEXTURE,
+        ATLAS,
         FONT,
         SOUND,
         MUSIC
@@ -278,6 +305,7 @@ class Assets
 
     std::unordered_map<std::string, SDL_Surface *> surfaceMap;
     std::unordered_map<std::string, SDL_Texture *> textureMap;
+    std::unordered_map<std::string, Atlas> atlasMap;
     std::unordered_map<std::string, TTF_Font *> fontMap;
     std::unordered_map<std::string, std::unique_ptr<ma_sound>> soundMap;
     std::unordered_map<std::string, std::unique_ptr<ma_sound>> musicMap;

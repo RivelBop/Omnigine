@@ -51,7 +51,7 @@ class Atlas
         Uint8 state{ 0 };
         std::string regionName;
         Uint32 index{ 0 };
-        SDL_Renderer *renderer{ Omni::Renderer() };
+        SDL_Renderer *renderer{ Renderer() };
         while (std::getline(f, readData)) {
             // Name
             if (state == 0) {
