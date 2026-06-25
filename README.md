@@ -1,4 +1,4 @@
-![Omnigine Logo](.github/logo.png)
+![Omnigine Logo](.github/logo.svg)
 
 # Omnigine
 
