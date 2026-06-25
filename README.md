@@ -1,3 +1,5 @@
+![Omnigine Logo](.github/logo.png)
+
 # Omnigine
 
 A nice and simple game framework built with [SDL](https://www.libsdl.org/), [miniaudio](https://miniaud.io/), and C++.
