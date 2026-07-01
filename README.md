@@ -13,12 +13,12 @@ This repo is a base project template, which builds with [CMake](https://cmake.or
 * **SDL**: Provides the necessary application utilities (window, rendering, input, etc.).
 * **miniaudio**: Provides the necessary audio-capabilities for wide-range of use.
 * **Quick Startup**: Simply clone the repo and build with CMake, all necessary external libraries will be downloaded and configured for you!
-* **Callback System**: Instead of coding your window initialization and game-loop from scratch, use the callback functions from [Main.h](include/Omnigine/Main.h).
-* **Scene System**: Split your games and/or applications into [scenes](include/Omnigine/Scene.h).
-* **Tick System**: Create a tick system callback anywhere in seconds via the [OMNI_TICK](include/Omnigine/Tick.h) macro.
-* **Camera System**: Create a [camera](include/Omnigine/Render.h) to project the renderer through.
-* **Asset Manager**: Quickly load, store, retrieve, and unload all your game's assets via the [Omni::Assets](include/Omnigine/Assets.h) class.
-* **Atlas Support**: Create and load atlas files made with [GDX Texture Packer](https://github.com/crashinvaders/gdx-texture-packer-gui) via the [Omni::Atlas](include/Omnigine/Atlas.h) class.
+* **Callback System**: Instead of coding your window initialization and game-loop from scratch, use the callback functions from [Main.h](include/Omni/Main.h).
+* **Scene System**: Split your games and/or applications into [scenes](include/Omni/Scene.h).
+* **Tick System**: Create a tick system callback anywhere in seconds via the [OMNI_TICK](include/Omni/Tick.h) macro.
+* **Camera System**: Create a [camera](include/Omni/Render.h) to project the renderer through.
+* **Asset Manager**: Quickly load, store, retrieve, and unload all your game's assets via the [Omni::Assets](include/Omni/Assets.h) class.
+* **Atlas Support**: Create and load atlas files made with [GDX Texture Packer](https://github.com/crashinvaders/gdx-texture-packer-gui) via the [Omni::Atlas](include/Omni/Atlas.h) class.
 
 ## Getting Started
 
@@ -71,7 +71,7 @@ emmake make
 This is a basic Omnigine example, it creates a 640x480 window with a black background and draws the text
 `Hello World!` in the top-left corner of the screen.
 ```cpp
-#include <Omnigine/Main.h>
+#include <Omni/Main.h>
 
 WindowProperties InitWindow(int argc, char *argv[])
 {
