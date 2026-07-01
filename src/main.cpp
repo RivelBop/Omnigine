@@ -1,4 +1,4 @@
-#include <Omnigine/omni_main.h>
+#include <Omnigine/Main.h>
 
 WindowProperties InitWindow(int argc, char *argv[])
 {

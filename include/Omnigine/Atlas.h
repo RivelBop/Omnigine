@@ -9,7 +9,7 @@
 
 #include <SDL3_image/SDL_image.h>
 
-#include "omni_render.h"
+#include "Render.h"
 
 namespace Omni
 {

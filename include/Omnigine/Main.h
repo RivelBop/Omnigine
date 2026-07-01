@@ -14,9 +14,9 @@
 #define MINIAUDIO_IMPLEMENTATION
 #include <miniaudio.h>
 
-#include "omni.h"
+#include "Omni.h"
 #ifdef OMNI_SCENE
-#include "omni_scene.h"
+#include "Scene.h"
 #endif
 
 /* ==================== WINDOW PROPERTIES ==================== */
@@ -154,14 +154,14 @@ std::vector<float> floatBuffer;
 } // namespace internal
 } // namespace
 
-/* ==================== OMNI_WINDOW.H ==================== */
+/* ==================== WINDOW.H ==================== */
 
 inline SDL_Window *Omni::Window()
 {
     return internal::window;
 }
 
-/* ==================== OMNI_RENDER.H ==================== */
+/* ==================== RENDER.H ==================== */
 
 /* ========== GLOBAL RENDERER ========== */
 
@@ -170,14 +170,14 @@ inline SDL_Renderer *Omni::Renderer()
     return internal::renderer;
 }
 
-/* ==================== OMNI_MINIAUDIO.H ==================== */
+/* ==================== AUDIO.H ==================== */
 
 inline ma_engine *Omni::SoundEngine()
 {
     return internal::soundEngine;
 }
 
-/* ==================== OMNI_RENDER.H ==================== */
+/* ==================== RENDER.H ==================== */
 
 /* ========== CAMERA-BASED RENDERING ========== */
 
@@ -467,7 +467,7 @@ inline bool Omni::RenderDebugTextFormat(float x, float y, const char *fmt, ...)
     return retval;
 }
 
-/* ==================== OMNI_INPUT.H ==================== */
+/* ==================== INPUT.H ==================== */
 
 /* ========== KEYBOARD ========== */
 
@@ -503,7 +503,7 @@ inline bool Omni::IsMouseJustPressed(Uint8 button)
     return internal::mouseJustPressed & SDL_BUTTON_MASK(button);
 }
 
-/* ==================== OMNI_INFO.H ==================== */
+/* ==================== INFO.H ==================== */
 
 inline float Omni::DeltaTime()
 {

@@ -9,9 +9,9 @@
 #include <SDL3_image/SDL_image.h>
 #include <SDL3_ttf/SDL_ttf.h>
 
-#include "omni_atlas.h"
-#include "omni_miniaudio.h"
-#include "omni_render.h"
+#include "Atlas.h"
+#include "Audio.h"
+#include "Render.h"
 
 namespace Omni
 {
