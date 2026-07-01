@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.16) # FetchContent on 3.11+, SDL3 on 3.16+
 set(CMAKE_CXX_STANDARD 17)
 
 # Initialize with C and C++ globally
-project(omnigine LANGUAGES C CXX)
+project(Omnigine LANGUAGES C CXX)
 
 # Enable Objective-C only on MacOS (fixes CMake error from SDL3)
 if (APPLE)
@@ -89,18 +89,6 @@ if (NOT miniaudio_FOUND)
 endif()
 
 # Our Project
-add_executable(${PROJECT_NAME} src/main.cpp
-        src/omnigine/omni_assets.h
-        src/omnigine/omni_atlas.h
-        src/omnigine/omni_info.h
-        src/omnigine/omni_input.h
-        src/omnigine/omni_main.h
-        src/omnigine/omni_miniaudio.h
-        src/omnigine/omni_render.h
-        src/omnigine/omni_scene.h
-        src/omnigine/omni_tick.h
-        src/omnigine/omni_window.h
-        src/omnigine/omni.h
-)
-
+add_executable(${PROJECT_NAME} src/main.cpp)
+target_include_directories(${PROJECT_NAME} PRIVATE include)
 target_link_libraries(${PROJECT_NAME} PRIVATE SDL3::SDL3 SDL3_image::SDL3_image SDL3_ttf::SDL3_ttf miniaudio)

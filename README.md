@@ -13,12 +13,12 @@ This repo is a base project template, which builds with [CMake](https://cmake.or
 * **SDL**: Provides the necessary application utilities (window, rendering, input, etc.).
 * **miniaudio**: Provides the necessary audio-capabilities for wide-range of use.
 * **Quick Startup**: Simply clone the repo and build with CMake, all necessary external libraries will be downloaded and configured for you!
-* **Callback System**: Instead of coding your window initialization and game-loop from scratch, use the callback functions from [omni_main.h](src/omnigine/omni_main.h).
-* **Scene System**: Split your games and/or applications into [scenes](src/omnigine/omni_scene.h).
-* **Tick System**: Create a tick system callback anywhere in seconds via the [OMNI_TICK](src/omnigine/omni_tick.h) macro.
-* **Camera System**: Create a [camera](src/omnigine/omni_render.h) to project the renderer through.
-* **Asset Manager**: Quickly load, store, retrieve, and unload all your game's assets via the [Omni::Assets](src/omnigine/omni_assets.h) class.
-* **Atlas Support**: Create and load atlas files made with [GDX Texture Packer](https://github.com/crashinvaders/gdx-texture-packer-gui) via the [Omni::Atlas](src/omnigine/omni_atlas.h) class.
+* **Callback System**: Instead of coding your window initialization and game-loop from scratch, use the callback functions from [omni_main.h](include/Omnigine/omni_main.h).
+* **Scene System**: Split your games and/or applications into [scenes](include/Omnigine/omni_scene.h).
+* **Tick System**: Create a tick system callback anywhere in seconds via the [OMNI_TICK](include/Omnigine/omni_tick.h) macro.
+* **Camera System**: Create a [camera](include/Omnigine/omni_render.h) to project the renderer through.
+* **Asset Manager**: Quickly load, store, retrieve, and unload all your game's assets via the [Omni::Assets](include/Omnigine/omni_assets.h) class.
+* **Atlas Support**: Create and load atlas files made with [GDX Texture Packer](https://github.com/crashinvaders/gdx-texture-packer-gui) via the [Omni::Atlas](include/Omnigine/omni_atlas.h) class.
 
 ## Getting Started
 
@@ -30,7 +30,7 @@ The Omnigine repo is a project template that is ready to use.
 
 ### CMake Usage
 
-In [CMakeLists.txt](CMakeLists.txt), you should set a custom name for your project by changing the `project(omnigine LANGUAGES C CXX)` to `project(YOUR_PROJECT_NAME LANGUAGES C CXX)`.
+In [CMakeLists.txt](CMakeLists.txt), you should set a custom name for your project by changing the `project(Omnigine LANGUAGES C CXX)` to `project(YOUR_PROJECT_NAME LANGUAGES C CXX)`.
 
 Any new source files that you create for your project should be added to the `add_executable` block.
 
@@ -71,7 +71,7 @@ emmake make
 This is a basic Omnigine example, it creates a 640x480 window with a black background and draws the text
 `Hello World!` in the top-left corner of the screen.
 ```cpp
-#include "omnigine/omni_main.h"
+#include <Omnigine/omni_main.h>
 
 WindowProperties InitWindow(int argc, char *argv[])
 {
