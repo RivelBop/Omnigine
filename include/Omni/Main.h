@@ -156,7 +156,7 @@ std::vector<float> floatBuffer;
 
 /* ==================== WINDOW.H ==================== */
 
-inline SDL_Window *Omni::Window()
+SDL_Window *Omni::Window()
 {
     return internal::window;
 }
@@ -165,14 +165,14 @@ inline SDL_Window *Omni::Window()
 
 /* ========== GLOBAL RENDERER ========== */
 
-inline SDL_Renderer *Omni::Renderer()
+SDL_Renderer *Omni::Renderer()
 {
     return internal::renderer;
 }
 
 /* ==================== AUDIO.H ==================== */
 
-inline ma_engine *Omni::SoundEngine()
+ma_engine *Omni::SoundEngine()
 {
     return internal::soundEngine;
 }
@@ -181,7 +181,7 @@ inline ma_engine *Omni::SoundEngine()
 
 /* ========== CAMERA-BASED RENDERING ========== */
 
-inline void Omni::RenderToCamera(const Omni::Camera *camera)
+void Omni::RenderToCamera(const Omni::Camera *camera)
 {
     Omni::Camera &cam{ internal::camera };
 
@@ -197,14 +197,14 @@ inline void Omni::RenderToCamera(const Omni::Camera *camera)
     SDL_SetRenderScale(internal::renderer, 1, 1);
 }
 
-inline bool Omni::RenderPoint(float x, float y)
+bool Omni::RenderPoint(float x, float y)
 {
     // This is how SDL_RenderPoint() is implemented
     SDL_FPoint fpoint{ x - internal::camera.x, y - internal::camera.y };
     return SDL_RenderPoints(internal::renderer, &fpoint, 1);
 }
 
-inline bool Omni::RenderPoints(const SDL_FPoint *points, int count)
+bool Omni::RenderPoints(const SDL_FPoint *points, int count)
 {
     // Ensure points are available and the camera is set to a non-default position
     if (points && count > 0 && (internal::camera.x != 0.0f || internal::camera.y != 0.0f)) {
@@ -228,14 +228,14 @@ inline bool Omni::RenderPoints(const SDL_FPoint *points, int count)
     return SDL_RenderPoints(internal::renderer, points, count);
 }
 
-inline bool Omni::RenderLine(float x1, float y1, float x2, float y2)
+bool Omni::RenderLine(float x1, float y1, float x2, float y2)
 {
     float x{ internal::camera.x };
     float y{ internal::camera.y };
     return SDL_RenderLine(internal::renderer, x1 - x, y1 - y, x2 - x, y2 - y);
 }
 
-inline bool Omni::RenderLines(const SDL_FPoint *points, int count)
+bool Omni::RenderLines(const SDL_FPoint *points, int count)
 {
     // Ensure points are available and the camera is set to a non-default position
     if (points && count > 1 && (internal::camera.x != 0.0f || internal::camera.y != 0.0f)) {
@@ -259,14 +259,14 @@ inline bool Omni::RenderLines(const SDL_FPoint *points, int count)
     return SDL_RenderLines(internal::renderer, points, count);
 }
 
-inline bool Omni::RenderRect(SDL_FRect rect)
+bool Omni::RenderRect(SDL_FRect rect)
 {
     rect.x -= internal::camera.x;
     rect.y -= internal::camera.y;
     return SDL_RenderRect(internal::renderer, &rect);
 }
 
-inline bool Omni::RenderRects(const SDL_FRect *rects, int count)
+bool Omni::RenderRects(const SDL_FRect *rects, int count)
 {
     // Ensure rects are available and the camera is set to a non-default position
     if (rects && count > 0 && (internal::camera.x != 0.0f || internal::camera.y != 0.0f)) {
@@ -295,14 +295,14 @@ inline bool Omni::RenderRects(const SDL_FRect *rects, int count)
     return SDL_RenderRects(internal::renderer, rects, count);
 }
 
-inline bool Omni::RenderFillRect(SDL_FRect rect)
+bool Omni::RenderFillRect(SDL_FRect rect)
 {
     rect.x -= internal::camera.x;
     rect.y -= internal::camera.y;
     return SDL_RenderFillRect(internal::renderer, &rect);
 }
 
-inline bool Omni::RenderFillRects(const SDL_FRect *rects, int count)
+bool Omni::RenderFillRects(const SDL_FRect *rects, int count)
 {
     // Ensure rects are available and the camera is set to a non-default position
     if (rects && count > 0 && (internal::camera.x != 0.0f || internal::camera.y != 0.0f)) {
@@ -326,21 +326,21 @@ inline bool Omni::RenderFillRects(const SDL_FRect *rects, int count)
     return SDL_RenderFillRects(internal::renderer, rects, count);
 }
 
-inline bool Omni::RenderTexture(SDL_Texture *texture, const SDL_FRect *srcrect, SDL_FRect dstrect)
+bool Omni::RenderTexture(SDL_Texture *texture, const SDL_FRect *srcrect, SDL_FRect dstrect)
 {
     dstrect.x -= internal::camera.x;
     dstrect.y -= internal::camera.y;
     return SDL_RenderTexture(internal::renderer, texture, srcrect, &dstrect);
 }
 
-inline bool Omni::RenderTextureRotated(SDL_Texture *texture, const SDL_FRect *srcrect, SDL_FRect dstrect, double angle, const SDL_FPoint *center, SDL_FlipMode flip)
+bool Omni::RenderTextureRotated(SDL_Texture *texture, const SDL_FRect *srcrect, SDL_FRect dstrect, double angle, const SDL_FPoint *center, SDL_FlipMode flip)
 {
     dstrect.x -= internal::camera.x;
     dstrect.y -= internal::camera.y;
     return SDL_RenderTextureRotated(internal::renderer, texture, srcrect, &dstrect, angle, center, flip);
 }
 
-inline bool Omni::RenderTextureAffine(SDL_Texture *texture, const SDL_FRect *srcrect, SDL_FPoint origin, SDL_FPoint right, SDL_FPoint down)
+bool Omni::RenderTextureAffine(SDL_Texture *texture, const SDL_FRect *srcrect, SDL_FPoint origin, SDL_FPoint right, SDL_FPoint down)
 {
     // Shift the local copies by the camera position
     origin.x -= internal::camera.x;
@@ -355,28 +355,28 @@ inline bool Omni::RenderTextureAffine(SDL_Texture *texture, const SDL_FRect *src
     return SDL_RenderTextureAffine(internal::renderer, texture, srcrect, &origin, &right, &down);
 }
 
-inline bool Omni::RenderTextureTiled(SDL_Texture *texture, const SDL_FRect *srcrect, float scale, SDL_FRect dstrect)
+bool Omni::RenderTextureTiled(SDL_Texture *texture, const SDL_FRect *srcrect, float scale, SDL_FRect dstrect)
 {
     dstrect.x -= internal::camera.x;
     dstrect.y -= internal::camera.y;
     return SDL_RenderTextureTiled(internal::renderer, texture, srcrect, scale, &dstrect);
 }
 
-inline bool Omni::RenderTexture9Grid(SDL_Texture *texture, const SDL_FRect *srcrect, float leftWidth, float rightWidth, float topHeight, float bottomHeight, float scale, SDL_FRect dstrect)
+bool Omni::RenderTexture9Grid(SDL_Texture *texture, const SDL_FRect *srcrect, float leftWidth, float rightWidth, float topHeight, float bottomHeight, float scale, SDL_FRect dstrect)
 {
     dstrect.x -= internal::camera.x;
     dstrect.y -= internal::camera.y;
     return SDL_RenderTexture9Grid(internal::renderer, texture, srcrect, leftWidth, rightWidth, topHeight, bottomHeight, scale, &dstrect);
 }
 
-inline bool Omni::RenderTexture9GridTiled(SDL_Texture *texture, const SDL_FRect *srcrect, float leftWidth, float rightWidth, float topHeight, float bottomHeight, float scale, SDL_FRect dstrect, float tileScale)
+bool Omni::RenderTexture9GridTiled(SDL_Texture *texture, const SDL_FRect *srcrect, float leftWidth, float rightWidth, float topHeight, float bottomHeight, float scale, SDL_FRect dstrect, float tileScale)
 {
     dstrect.x -= internal::camera.x;
     dstrect.y -= internal::camera.y;
     return SDL_RenderTexture9GridTiled(internal::renderer, texture, srcrect, leftWidth, rightWidth, topHeight, bottomHeight, scale, &dstrect, tileScale);
 }
 
-inline bool Omni::RenderGeometry(SDL_Texture *texture, const SDL_Vertex *vertices, int numVertices, const int *indices, int numIndices)
+bool Omni::RenderGeometry(SDL_Texture *texture, const SDL_Vertex *vertices, int numVertices, const int *indices, int numIndices)
 {
     // Ensure vertices provided and the camera is set to a non-default position
     if (vertices && numVertices > 0 && (internal::camera.x != 0.0f || internal::camera.y != 0.0f)) {
@@ -403,7 +403,7 @@ inline bool Omni::RenderGeometry(SDL_Texture *texture, const SDL_Vertex *vertice
     return SDL_RenderGeometry(internal::renderer, texture, vertices, numVertices, indices, numIndices);
 }
 
-inline bool Omni::RenderGeometryRaw(SDL_Texture *texture, const float *xy, int xyStride, const SDL_FColor *color, int colorStride, const float *uv, int uvStride, int numVertices, const void *indices, int numIndices, int sizeIndices)
+bool Omni::RenderGeometryRaw(SDL_Texture *texture, const float *xy, int xyStride, const SDL_FColor *color, int colorStride, const float *uv, int uvStride, int numVertices, const void *indices, int numIndices, int sizeIndices)
 {
     // Perform some of the required checks SDL_RenderGeometryRaw() does and ensure the camera is at a non-default position
     if (xy && color && (!texture || uv) && numVertices > 2 && (internal::camera.x != 0.0f || internal::camera.y != 0.0f)) {
@@ -435,12 +435,12 @@ inline bool Omni::RenderGeometryRaw(SDL_Texture *texture, const float *xy, int x
     return SDL_RenderGeometryRaw(internal::renderer, texture, xy, xyStride, color, colorStride, uv, uvStride, numVertices, indices, numIndices, sizeIndices);
 }
 
-inline bool Omni::RenderDebugText(float x, float y, const char *str)
+bool Omni::RenderDebugText(float x, float y, const char *str)
 {
     return SDL_RenderDebugText(internal::renderer, x - internal::camera.x, y - internal::camera.y, str);
 }
 
-inline bool Omni::RenderDebugTextFormat(float x, float y, const char *fmt, ...)
+bool Omni::RenderDebugTextFormat(float x, float y, const char *fmt, ...)
 {
     // The following is taken straight from SDL_RenderDebugTextFormat()
     va_list ap;
@@ -471,46 +471,46 @@ inline bool Omni::RenderDebugTextFormat(float x, float y, const char *fmt, ...)
 
 /* ========== KEYBOARD ========== */
 
-inline bool Omni::IsKeyPressed(SDL_Scancode key)
+bool Omni::IsKeyPressed(SDL_Scancode key)
 {
     return internal::keysPressed[key];
 }
 
-inline bool Omni::IsKeyPressed(SDL_Keycode key)
+bool Omni::IsKeyPressed(SDL_Keycode key)
 {
     return internal::keysPressed[SDL_GetScancodeFromKey(key, nullptr)];
 }
 
-inline bool Omni::IsKeyJustPressed(SDL_Scancode key)
+bool Omni::IsKeyJustPressed(SDL_Scancode key)
 {
     return internal::keysJustPressed[key];
 }
 
-inline bool Omni::IsKeyJustPressed(SDL_Keycode key)
+bool Omni::IsKeyJustPressed(SDL_Keycode key)
 {
     return internal::keysJustPressed[SDL_GetScancodeFromKey(key, nullptr)];
 }
 
 /* ========== MOUSE ========== */
 
-inline bool Omni::IsMousePressed(Uint8 button)
+bool Omni::IsMousePressed(Uint8 button)
 {
     return internal::mousePressed & SDL_BUTTON_MASK(button);
 }
 
-inline bool Omni::IsMouseJustPressed(Uint8 button)
+bool Omni::IsMouseJustPressed(Uint8 button)
 {
     return internal::mouseJustPressed & SDL_BUTTON_MASK(button);
 }
 
 /* ==================== INFO.H ==================== */
 
-inline float Omni::DeltaTime()
+float Omni::DeltaTime()
 {
     return internal::deltaTime;
 }
 
-inline Uint32 Omni::FPS()
+Uint32 Omni::FPS()
 {
     return internal::fps;
 }
@@ -518,7 +518,7 @@ inline Uint32 Omni::FPS()
 /* ==================== SDL CALLBACK SETUP ==================== */
 
 /* Runs once at startup. */
-inline SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
+SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
 {
     // Create the app state to hide from user
     static internal::AppState appState;
@@ -578,7 +578,7 @@ inline SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
 }
 
 /* This function runs when a new event (mouse input, keypresses, etc.) occurs. */
-inline SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
+SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
 {
     internal::AppState &appState{ *static_cast<internal::AppState *>(appstate) };
 
@@ -612,7 +612,7 @@ inline SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
 }
 
 /* This function runs once per frame, and is the heart of the program. */
-inline SDL_AppResult SDL_AppIterate(void *appstate)
+SDL_AppResult SDL_AppIterate(void *appstate)
 {
     static Uint64 startDt{ SDL_GetTicksNS() };
     static Uint64 startFps{ startDt };
@@ -682,7 +682,7 @@ inline SDL_AppResult SDL_AppIterate(void *appstate)
 }
 
 /* This function runs once at shutdown; SDL will clean up the window/renderer for us. */
-inline void SDL_AppQuit(void *appstate, SDL_AppResult result)
+void SDL_AppQuit(void *appstate, SDL_AppResult result)
 {
     internal::AppState &appState{ *static_cast<internal::AppState *>(appstate) };
 #ifdef OMNI_SCENE
