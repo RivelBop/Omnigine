@@ -569,7 +569,7 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
     Omni::Scene *&currentScene{ appState.currentScene };
     currentScene = Init(argc, argv);
     if (currentScene)
-        currentScene->init();
+        currentScene->Init();
     appState.nextScene = currentScene;
     return currentScene ? SDL_APP_CONTINUE : SDL_APP_FAILURE;
 #else
@@ -649,20 +649,20 @@ SDL_AppResult SDL_AppIterate(void *appstate)
 
     // Changing Scenes: Dispose and free current scene, initialize the next scene and set it as current
     if (currentScene != nextScene) {
-        if (currentScene->dispose())
+        if (currentScene->Dispose())
             delete currentScene;
-        nextScene->init();
+        nextScene->Init();
         currentScene = nextScene;
     }
 
     // Called here to ensure the current scene and next scene always match to free memory from both properly
-    // This also allows init() to be called before dispose() outside the game loop
+    // This also allows Init() to be called before Dispose() outside the game loop
     if (appState.quit)
         return SDL_APP_SUCCESS;
 
     // Update the global render functions and the current scene, mark the next scene for any potential changes
     PreRender(internal::deltaTime);
-    nextScene = currentScene->render(internal::deltaTime);
+    nextScene = currentScene->Render(internal::deltaTime);
     PostRender(internal::deltaTime);
 #else
     if (appState.quit || !Render(internal::deltaTime))
@@ -688,7 +688,7 @@ void SDL_AppQuit(void *appstate, SDL_AppResult result)
 #ifdef OMNI_SCENE
     // Dispose remaining scene (if available)
     Omni::Scene *&currentScene{ appState.currentScene };
-    if (currentScene && currentScene->dispose()) {
+    if (currentScene && currentScene->Dispose()) {
         delete currentScene;
         currentScene = nullptr;
         appState.nextScene = nullptr;
