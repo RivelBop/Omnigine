@@ -8,14 +8,14 @@ project(Omnigine LANGUAGES C CXX)
 
 # Enable Objective-C only on MacOS (fixes CMake error from SDL3)
 if (APPLE)
-    enable_language(OBJC OBJCXX)
+  enable_language(OBJC OBJCXX)
 endif()
 
 # Generate compile_commands.json (useful for IDEs)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # SDL3 Dependencies
-set(SDL3_VERSION 3.4.10)
+set(SDL3_VERSION 3.4.12)
 find_package(SDL3 ${SDL3_VERSION} QUIET)
 if (NOT SDL3_FOUND)
   include(FetchContent)
