@@ -127,7 +127,7 @@ class Atlas
                     SDL_DestroySurface(atlasImg);
                     f.close();
 
-                    free();
+                    Free();
                     regionMap.clear();
                     throw std::runtime_error("Unable to create temporary surface for texture region generation.");
                 }
@@ -139,7 +139,7 @@ class Atlas
                     SDL_DestroySurface(atlasImg);
                     f.close();
 
-                    free();
+                    Free();
                     regionMap.clear();
                     throw std::runtime_error("Unable to create texture region from temporary surface.");
                 }
@@ -156,7 +156,7 @@ class Atlas
 
         // Bounds must always be the last portion of the atlas (which should have set the state back to 0)
         if (state != 0) {
-            free();
+            Free();
             regionMap.clear();
             throw std::runtime_error("Unable to parse atlas file, please ensure the atlas is formatted correctly.");
         }
@@ -170,7 +170,7 @@ class Atlas
 
     ~Atlas()
     {
-        free();
+        Free();
     }
 
     Atlas &operator=(const Atlas &) = delete;
@@ -179,7 +179,7 @@ class Atlas
     {
         if (this != &atlas) {
             // Dispose of this regionMap
-            free();
+            Free();
             regionMap.clear();
 
             // Move the data from the other atlas to this
@@ -189,7 +189,7 @@ class Atlas
     }
 
     /** Returns all texture regions (in indexed order) with the name provided. */
-    [[nodiscard]] const std::vector<SDL_Texture *> &get(const std::string &regionName) const
+    [[nodiscard]] const std::vector<SDL_Texture *> &Get(const std::string &regionName) const
     {
         return regionMap.at(regionName);
     }
@@ -197,7 +197,7 @@ class Atlas
   private:
     std::unordered_map<std::string, std::vector<SDL_Texture *>> regionMap;
 
-    void free()
+    void Free()
     {
         for (auto &r : regionMap) {
             for (SDL_Texture *t : r.second)
