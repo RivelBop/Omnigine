@@ -20,34 +20,34 @@ class Assets
   public:
     /* ==================== LOADING ==================== */
 
-    void loadSurface(const std::string &fileName)
+    void LoadSurface(const std::string &fileName)
     {
-        load(fileName, SURFACE);
+        Load(fileName, SURFACE);
     }
 
-    void loadTexture(const std::string &fileName)
+    void LoadTexture(const std::string &fileName)
     {
-        load(fileName, TEXTURE);
+        Load(fileName, TEXTURE);
     }
 
-    void loadAtlas(const std::string &fileName)
+    void LoadAtlas(const std::string &fileName)
     {
-        load(fileName, ATLAS);
+        Load(fileName, ATLAS);
     }
 
-    void loadFont(const std::string &fileName)
+    void LoadFont(const std::string &fileName)
     {
-        load(fileName, FONT);
+        Load(fileName, FONT);
     }
 
-    void loadSound(const std::string &fileName)
+    void LoadSound(const std::string &fileName)
     {
-        load(fileName, SOUND);
+        Load(fileName, SOUND);
     }
 
-    void loadMusic(const std::string &fileName)
+    void LoadMusic(const std::string &fileName)
     {
-        load(fileName, MUSIC);
+        Load(fileName, MUSIC);
     }
 
     /* ==================== INITIALIZING AND UPDATING ==================== */
@@ -56,7 +56,7 @@ class Assets
      * Get the first queued asset and initialize it.
      * Returns true if all queued assets have been initialized.
      */
-    [[nodiscard]] bool update()
+    [[nodiscard]] bool Update()
     {
         // Initial size check to ensure the assets aren't already done loading
         size_t size{ loadQueue.size() };
@@ -124,55 +124,55 @@ class Assets
      * NOTE: The timing is NOT accurate, some assets take longer to load than others!
      * Returns true if all queued assets have been initialized.
      */
-    [[nodiscard]] bool update(Uint64 time)
+    [[nodiscard]] bool Update(Uint64 time)
     {
         Uint64 start{ SDL_GetTicks() };
         while (SDL_GetTicks() - start < time) {
-            if (update())
+            if (Update())
                 return true;
         }
         return false;
     }
 
     /** Initialize ALL queued assets for loading. */
-    void finishLoading()
+    void FinishLoading()
     {
-        while (!update())
+        while (!Update())
             ;
     }
 
     /* ==================== GET LOADED AND INITIALIZED ASSETS ==================== */
 
     /** Returns the same (shared) surface, best to clone if editing!  */
-    [[nodiscard]] SDL_Surface *getSurface(const std::string &fileName) const
+    [[nodiscard]] SDL_Surface *GetSurface(const std::string &fileName) const
     {
         return surfaceMap.at(fileName);
     }
 
-    [[nodiscard]] SDL_Texture *getTexture(const std::string &fileName) const
+    [[nodiscard]] SDL_Texture *GetTexture(const std::string &fileName) const
     {
         return textureMap.at(fileName);
     }
 
-    [[nodiscard]] const Atlas &getAtlas(const std::string &fileName) const
+    [[nodiscard]] const Atlas &GetAtlas(const std::string &fileName) const
     {
         return atlasMap.at(fileName);
     }
 
     /** Returns the specified font with a default size of 16.0f. Clone or resize if necessary! */
-    [[nodiscard]] TTF_Font *getFont(const std::string &fileName) const
+    [[nodiscard]] TTF_Font *GetFont(const std::string &fileName) const
     {
         return fontMap.at(fileName);
     }
 
     /** Returns the same (shared) loaded sound instance, clone to play! */
-    [[nodiscard]] ma_sound *getSound(const std::string &fileName) const
+    [[nodiscard]] ma_sound *GetSound(const std::string &fileName) const
     {
         return soundMap.at(fileName).get();
     }
 
     /** Returns the same (shared) loaded streamed sound instance, clone to play! */
-    [[nodiscard]] ma_sound *getMusic(const std::string &fileName) const
+    [[nodiscard]] ma_sound *GetMusic(const std::string &fileName) const
     {
         return musicMap.at(fileName).get();
     }
@@ -180,7 +180,7 @@ class Assets
     /* ==================== UNLOAD ASSETS ==================== */
 
     /** Destroys and removes the specified asset, does not remove the asset from the load queue. */
-    void unload(const std::string &fileName)
+    void Unload(const std::string &fileName)
     {
         // Ensure the load() method was called on the asset
         auto typeIterator{ typeMap.find(fileName) };
@@ -257,7 +257,7 @@ class Assets
     }
 
     /** Unloads and removes all assets (including from the load queue). */
-    void unloadAll()
+    void UnloadAll()
     {
         while (!loadQueue.empty()) {
             std::string asset{ loadQueue.front() };
@@ -268,7 +268,7 @@ class Assets
         while (!typeMap.empty()) {
             // Copy file name to avoid dangling reference when passed into unload()
             std::string copyFileName{ typeMap.begin()->first };
-            unload(copyFileName);
+            Unload(copyFileName);
         }
     }
 
@@ -285,7 +285,7 @@ class Assets
     /** Unload all assets. */
     ~Assets()
     {
-        unloadAll();
+        UnloadAll();
     }
 
   private:
@@ -319,7 +319,7 @@ class Assets
     std::unordered_map<std::string, Type> typeMap;
 
     /** Queues the asset file for loading and stores its type. */
-    void load(const std::string &fileName, Type assetType)
+    void Load(const std::string &fileName, Type assetType)
     {
         // Ensure this asset hasn't called load() before
         if (typeMap.find(fileName) == typeMap.end()) {
